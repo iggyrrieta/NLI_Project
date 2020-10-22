@@ -6,7 +6,7 @@ This repository is for **coding** and **tasks/issue** management, all related do
 
 ## **Requirements**
 
-[Linux](doc/install_linux.md)
+[Linux](doc/requirements_linux.md)
 
 
 
