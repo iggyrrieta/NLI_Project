@@ -1,0 +1,7 @@
+# IDE-related
+.idea
+.DS_Store
+
+# Jupyter
+notebooks/.ipynb_checkpoints
+notebooks/.~lock.data.csv#
