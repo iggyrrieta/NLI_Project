@@ -12,6 +12,13 @@ playsound = "*"
 gtts = "*"
 pyobjc = "*"
 pyaudio = "*"
+pandas = "*"
+sklearn = "*"
+spacy = "*"
+jupyter = "*"
+jupyterlab = "*"
+textacy = "*"
+wikipedia = "*"
 
 [requires]
 python_version = "3.8"
