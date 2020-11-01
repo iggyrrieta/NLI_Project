@@ -5,3 +5,4 @@
 # Jupyter
 notebooks/.ipynb_checkpoints
 notebooks/.~lock.data.csv#
+notebooks/data
