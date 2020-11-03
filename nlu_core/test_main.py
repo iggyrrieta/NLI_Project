@@ -1,5 +1,5 @@
 import unittest
-from nlu_core.main import Core
+from main import Core
 
 
 class TestCoreMethods(unittest.TestCase):
@@ -35,3 +35,6 @@ class TestCoreMethods(unittest.TestCase):
         self.assertTrue(probabilities is not None)
 
         self.assertTrue(prediction == 'restaurant_search')
+
+if __name__ == '__main__':
+    unittest.main()

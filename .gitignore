@@ -6,3 +6,11 @@
 notebooks/.ipynb_checkpoints
 notebooks/.~lock.data.csv#
 notebooks/data
+
+### VisualStudioCode ###
+# exclude everything
+.vscode/*
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+**/.history
