@@ -2,6 +2,9 @@
 .idea
 .DS_Store
 
+# Python cache
+__pycache__/
+
 # Jupyter
 notebooks/.ipynb_checkpoints
 notebooks/.~lock.data.csv#

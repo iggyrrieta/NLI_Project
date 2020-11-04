@@ -2,9 +2,12 @@ from flask import Flask, render_template, request # Web app
 import os # to save/open files 
 from datetime import datetime # to create folder with date
 
+# ROOT FOLDER : Make things easier setting the root folder as the origin
 import sys
-sys.path.insert(0, 'imutils/')
-import dmanager
+root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+sys.path.insert(0, root_path)
+# DM
+from dm_core.main import Core as dm_core
 
 #############################################
 # GLOBAL: CREATE LOCAL FOLDER WITH PERMISSION         
@@ -30,8 +33,11 @@ def home():
 #############################################
 @app.route('/start')
 def flow():
-    manager = dmanager.Dmanager(path)
-    manager.start()
+    manager = dm_core()
+    # TODO: Create a start() function inside DM
+    # This function should be connected to sp_recognition module
+    # and get the audio converted to text to start flow.
+    manager.start()  
 
 #############################################
 # MAIN
