@@ -1,3 +1,4 @@
+import os
 import spacy
 import pandas as pd
 import numpy as np
@@ -9,7 +10,9 @@ class Core:
     """
     Core NLU for intent predictions.
     """
-    def __init__(self):
+    def __init__(self, db_name='data.csv'):
+        self.root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+        self.db_path = f'{self.root_path}/data/{db_name}'
         self.classifier = None
         self.classes = None
         self.label_encoder = None
@@ -23,7 +26,7 @@ class Core:
         Obtains X and y data from a data frame. Encodes label and data as numpy values.
         :return:
         """
-        df = pd.read_csv('data.csv')
+        df = pd.read_csv(self.db_path )
 
         X_as_text = df['text']
         y_as_text = df['intent']
