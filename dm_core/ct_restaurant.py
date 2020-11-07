@@ -6,9 +6,7 @@ from string import Template
 class ConversationTracker:
     """Tracking of conversations."""
 
-    # Store API Key as a Class variable.
-    # TODO: Remove API key before making project public. ;)
-    ZOMATO_API_KEY = "b91883b642bc6da65f15c8a1d6829288"
+    # Couple of convenience class variables.
     ENDPOINT_URL = "https://developers.zomato.com/api/v2.1/"
     PATHS = {
         "cities" : Template("$baseurl/cities?q=$place_name"), # `city_id` obtained from this endpoint is needed by other endpoints.
@@ -17,7 +15,7 @@ class ConversationTracker:
     }
     REQUEST_HEADER = {
         "Accept" : "application/json",
-        "user-key" : "b91883b642bc6da65f15c8a1d6829288"
+        "user-key" : "b91883b642bc6da65f15c8a1d6829288" # TODO: Remove API key before making project public. ;)
     }
 
     def __init__(self):
@@ -39,7 +37,7 @@ class ConversationTracker:
         # Get place_id and store it.
         # Hard coding it for now.
         if self.place_id is None:
-            url = PATHS["cities"].substitute(
+            url = ConversationTracker.PATHS["cities"].substitute(
                 baseurl=ConversationTracker.ENDPOINT_URL,
                 place_name="Kolkata")
 
