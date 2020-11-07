@@ -1,16 +1,21 @@
 # IDE-related
 .idea
 .DS_Store
+.vscode/*
+**/.history
 
 # Jupyter
 notebooks/.ipynb_checkpoints
 notebooks/.~lock.data.csv#
 notebooks/data
 
-### VisualStudioCode ###
-# exclude everything
-.vscode/*
+# pycache
+dm_core/__pycache__
+nlu_core/__pycache__
 
-### VisualStudioCode Patch ###
-# Ignore all local history of files
-**/.history
+# speechRecognition
+media/chat_**
+
+# data
+data/.~__pycache__
+data/.~lock.data.csv# 

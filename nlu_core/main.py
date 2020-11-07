@@ -6,17 +6,19 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import LogisticRegression
 
 
-class Core:
+class NLUCore:
     """
     Core NLU for intent predictions.
     """
+
     def __init__(self, db_name='data.csv'):
         self.root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-        self.db_path = f'{self.root_path}/data/{db_name}'
+        self.db_path = f'{self.root_path}/NLI_Project/data/{db_name}'
         self.classifier = None
         self.classes = None
         self.label_encoder = None
         self.spacy_nlp = spacy.load('en_core_web_lg')
+        self.extracted_entities = None
 
         X, y = self.__pre_process_data()
         self.__initialize_classifier(X, y)
@@ -26,7 +28,7 @@ class Core:
         Obtains X and y data from a data frame. Encodes label and data as numpy values.
         :return:
         """
-        df = pd.read_csv(self.db_path )
+        df = pd.read_csv(self.db_path)
 
         X_as_text = df['text']
         y_as_text = df['intent']
@@ -60,6 +62,20 @@ class Core:
         classifier = LogisticRegression(random_state=0).fit(X, y)
         self.classifier = classifier
 
+    def __extract_entities(self, text, prediction):
+        """
+        Entity extraction for the user utterances, needed to complete the slots details
+        :param text: The user utterance in need to be parsed
+        :param prediction: Prediction of the utterance type, in case we need to perform extra steps to detect properly
+        entities for a particular utterance type
+        :return: A list containing all the entities recognized, set to the class proeprties
+        """
+        doc = self.spacy_nlp(text)
+        for ent in doc.ents:
+            print(ent, ent.label_)
+
+        self.extracted_entities = doc.ents
+
     def predict_intent(self, text):
         """
         Prediction made over a particular sentence provided by the user. For instance: 'I`m looking  for a restaurant'
@@ -73,5 +89,6 @@ class Core:
         probabilities = self.classifier.predict_proba(np.array(word_vector).reshape(1, -1))
 
         prediction = self.label_encoder.inverse_transform([enc_prediction])
+        self.__extract_entities(text, prediction[0])
 
-        return prediction, probabilities[0]
+        return prediction[0], probabilities[0]
