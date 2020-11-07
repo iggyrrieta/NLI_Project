@@ -36,7 +36,7 @@ class DMCore:
 
         # Access to database
         self.root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-        self.db_path = f'{self.root_path}/NLI_Project/data/{db_name}'
+        self.db_path = f'{self.root_path}/data/{db_name}'
 
         # Read db file
         data = pd.read_csv(self.db_path, delimiter=',')

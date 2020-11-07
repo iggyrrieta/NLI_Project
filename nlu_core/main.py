@@ -13,7 +13,7 @@ class NLUCore:
 
     def __init__(self, db_name='data.csv'):
         self.root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-        self.db_path = f'{self.root_path}/NLI_Project/data/{db_name}'
+        self.db_path = f'{self.root_path}/data/{db_name}'
         self.classifier = None
         self.classes = None
         self.label_encoder = None
