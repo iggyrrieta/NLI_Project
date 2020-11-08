@@ -1,10 +1,14 @@
 import os
+import sys
 import spacy
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from sklearn.linear_model import LogisticRegression
 
+# ROOT FOLDER : Make things easier setting the root folder as the origin
+#root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+#sys.path.insert(0, root_path)
 
 class NLUCore:
     """
@@ -13,7 +17,7 @@ class NLUCore:
 
     def __init__(self, db_name='data.csv'):
         self.root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-        self.db_path = f'{self.root_path}/data/{db_name}'
+        self.db_path = f'{self.root_path}/NLI_Project/data/{db_name}'
         self.classifier = None
         self.classes = None
         self.label_encoder = None

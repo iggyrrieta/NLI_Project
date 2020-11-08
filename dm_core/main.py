@@ -1,11 +1,14 @@
 import os
+import sys
 import pandas as pd
 
-# ROOT FOLDER : Make things easier setting the root folder as the origin
-import sys
 
-root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-sys.path.insert(0, root_path)
+# ROOT FOLDER : Make things easier setting the root folder as the origin
+#root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+#sys.path.insert(0, root_path)
+
+# SP
+from sp_recognition.main import SPCore
 # NLU
 from nlu_core.main import NLUCore
 # Conversation trackers
@@ -36,7 +39,7 @@ class DMCore:
 
         # Access to database
         self.root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-        self.db_path = f'{self.root_path}/data/{db_name}'
+        self.db_path = f'{self.root_path}/NLI_Project/data/{db_name}'
 
         # Read db file
         data = pd.read_csv(self.db_path, delimiter=',')
@@ -135,20 +138,28 @@ class DMCore:
         else:
             self.conversation_tracker = None
 
-    def subscribe(self):
+    def start(self, path):
         '''Subscribtion to topic self.conversation_tracker
            Get the current info from that topic
         '''
+        # Instiantiate Speech recognition
+        self.speechrecognition = SPCore(path)
+        # First talk: INTRO
+        self.speechrecognition.assistant_voice("Hello, I am a guide tour assistant. How can I help you?")
+
         while (1):
 
+            client_in = self.speechrecognition.get_audio()
+            # We start conversation with client_in input
+            self.new_utterance(client_in)
             agent_action = self.conversation_tracker.next_agent_action
-            self.conversation_tracker.agent_response(agent_action)
 
-            if agent_action in ['goodbye', 'exit']:
+            if agent_action in ['Bye', 'goodbye', 'exit']:
                 break
             else:
-                pass
-        self.agent_response(f"Bye")
+                self.speechrecognition.assistant_voice(agent_action)
+
+        self.speechrecognition.assistant_voice("Bye")
         
 
     def new_utterance(self, client_in):
@@ -181,11 +192,11 @@ class DMCore:
             # Directly pointing the current conversation tracker (ct)
             self.conversation_tracker.new_utterance(client_in, self.detected_entities)
 
-    def start(self):
-        self.agent_response("Hello, I am your assistant. How can I help you?")
+    #def start(self):
+    #    self.agent_response("Hello, I am your assistant. How can I help you?")
 
         # Start chat
-        self.chat()
+    #    self.chat()
 
     def agent_response(self, output):
         user_response = input(output)
