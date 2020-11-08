@@ -1,11 +1,14 @@
 import os
+import sys
 import pandas as pd
 
-# ROOT FOLDER : Make things easier setting the root folder as the origin
-import sys
 
-root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-sys.path.insert(0, root_path)
+# ROOT FOLDER : Make things easier setting the root folder as the origin
+#root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+#sys.path.insert(0, root_path)
+
+# SP
+from sp_recognition.main import SPCore
 # NLU
 from nlu_core.main import NLUCore
 # Conversation trackers
@@ -36,13 +39,13 @@ class DMCore:
 
         # Access to database
         self.root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-        self.db_path = f'{self.root_path}/data/{db_name}'
+        self.db_path = f'{self.root_path}/NLI_Project/data/{db_name}'
 
         # Read db file
         data = pd.read_csv(self.db_path, delimiter=',')
         self.agent_intents =['greet', 'goodbye', 'restaurant_search', 'interest_search']
 
-        # --- This code should be moved to the corresponding Conversational Tracker ---
+        # TODO --- This code should be moved to the corresponding Conversational Tracker ---
         # Logic is really similar for every CT we use, detect missing slots and manage actions to ask them to the user
         # Doing it here for integration purposes and to have a better idea of the loop
 
@@ -62,10 +65,8 @@ class DMCore:
             f'STARTED: {self.conversation_started}',
             f'LAST_TEXT: {self.user_utterance}',
             f'AGENT INTENTS: {self.agent_intents}',
-            f'AGENT SLOTS FOR INTENT: {self.agent_slots}',
             f'INTENT: {self.predicted}',
             f'TRACKER: {self.conversation_tracker}',
-            '----------------'
         ])
 
     def _get_intent(self):
@@ -82,11 +83,13 @@ class DMCore:
             self.all_intents_probability = probabilities
 
             self.detected_entities = nlu.extracted_entities
+            
         else:
             self.predicted = 'Intent not found'
             self.all_intents_probability = None
+            self.detected_entities = None
 
-    def _get_conversation_tracker(self):
+    def _set_conversation_tracker(self):
         ''' MOVE TO CONVERSATION TRACKER
             Based on the _get_intent() obtained,
             call the specific conversation tracker
@@ -95,11 +98,11 @@ class DMCore:
         if self.predicted in self.agent_intents:
             # Move to the specific conversation tracker detected per intent
             if self.predicted == 'greet':
-                self.conversation_tracker = None  # provisional
+                self.conversation_tracker = None
                 self.next_agent_action = 'Hi there!'
 
             if self.predicted == 'goodbye':
-                self.conversation_tracker = None  # provisional
+                self.conversation_tracker = None
                 self.next_agent_action = 'Bye :(, come back soon!'
 
             if self.predicted == 'restaurant_search':
@@ -131,8 +134,33 @@ class DMCore:
                 # Prior doing the search itself, we should complete all the slots needed
                 # i.e., interest_search needs interest and location slots to perform the search properly
                 self.conversation_tracker = ct_interest()
+                self.conversation_tracker.start()
         else:
             self.conversation_tracker = None
+
+    def start(self, path):
+        '''Subscribtion to topic self.conversation_tracker
+           Get the current info from that topic
+        '''
+        # Instiantiate Speech recognition
+        self.speechrecognition = SPCore(path)
+        # First talk: INTRO
+        self.speechrecognition.assistant_voice("Hello, I am a guide tour assistant. How can I help you?")
+
+        while (1):
+
+            client_in = self.speechrecognition.get_audio()
+            # We start conversation with client_in input
+            self.new_utterance(client_in)
+            agent_action = self.conversation_tracker.next_agent_action
+
+            if agent_action in ['Bye', 'goodbye', 'exit']:
+                break
+            else:
+                self.speechrecognition.assistant_voice(agent_action)
+
+        self.speechrecognition.assistant_voice("Bye")
+        
 
     def new_utterance(self, client_in):
         self.user_utterance = client_in
@@ -154,21 +182,21 @@ class DMCore:
             if self.predicted in self.agent_intents:
 
                 # Get conversation tracker
-                self._get_conversation_tracker()
+                self._set_conversation_tracker()
                 if self.conversation_tracker is not None:
                     self.conversation_started = True
-                    #self.conversation_tracker.new_utterance(client_in)
+                    self.conversation_tracker.new_utterance(client_in, self.detected_entities)
 
         # All other entries
         else:
             # Directly pointing the current conversation tracker (ct)
-            self.conversation_tracker.new_utterance(client_in)
+            self.conversation_tracker.new_utterance(client_in, self.detected_entities)
 
-    def start(self):
-        self.agent_response("Hello, I am your assistant. How can I help you?")
+    #def start(self):
+    #    self.agent_response("Hello, I am your assistant. How can I help you?")
 
         # Start chat
-        self.chat()
+    #    self.chat()
 
     def agent_response(self, output):
         user_response = input(output)

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>TOURIST GUIDE ASSISTANT</title>
+  <link type="text/css" rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+ </head>
+
+<body style="background-color:slateblue;">
+    <h1 style="color:olivedrab;">TOURIST GUIDE ASSISTANT</h1>
+    <p style="color:seashell;">Chat started ...</p>
+
+    <!--WE NEED AN INTRO AUDIO TO START-->
+    <audio id="assistant_speaks" src="../media/INTRO.mp3"></audio>
+
+    <script>
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/start', true);
+    xhr.send();
+
+    //AUDIO PLAY
+    xhr.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            var filePath = this.responseText;
+            var audio = document.getElementById('assistant_speaks');
+            audio.src = filePath;
+            audio.load();
+            audio.oncanplaythrough = function() {
+                this.play();
+            }
+        }
+    }
+    </script>
+</body>
+</html>
