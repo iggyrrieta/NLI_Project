@@ -1,8 +1,5 @@
-import os
-import sys
-import requests
-import json
 import wikipedia
+import re
 
 # ROOT FOLDER : Make things easier setting the root folder as the origin
 # root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
@@ -60,8 +57,11 @@ class ConversationTracker:
     def _wiki_info(self, text):
         ''' WIKIPEDIA API connection.
         '''
-        # self.wiki_info  = utils.del_stopwords(wikipedia.summary(text))
-        self.wiki_info = wikipedia.summary(text, sentences=1)
+
+        # Remove parenthesis info from Wikipedia summary as it always include original language pronunciation
+        wiki_aux = wikipedia.summary(text, sentences=1)
+        regex = re.compile(".*?\((.*?)\)")
+        self.wiki_info = re.findall(regex, wiki_aux)
 
     def new_utterance(self, text, entity):
         ''' Receive new text entry
