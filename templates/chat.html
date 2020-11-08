@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ data.title }}</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/chat.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery-1.9.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</head>
+<body>
+
+    <div id="main" class="container-fluid">
+
+        <h1>{{ data.title }}</h1>
+        <h2 class="lead">{{ data.description }}</h2>
+
+        <form method="post" action="/start">
+            <!--START APPLICATION-->
+            <input type="submit" name="start" value="start" class="btn btn-success">
+
+            <!--GET HISTORY LOG-->
+            <div class="messages">
+                {% for input in log %}
+                    {{ input }}
+                {% endfor %}
+            </div>
+
+            <!--TALK MANUALLY USING THE INPUT TEXT BOX-->
+            <input type="checkbox" id="enable_manual" name="enable_manual">
+            <input type="text" name="message" id="message" placeholder="Type a message" class="input-xlarge"/>
+            <input type="submit" value="Send" class="btn btn-primary"/>
+        </form>
+
+    <!--WE NEED AN INTRO AUDIO TO START-->
+    <audio id="assistant_speaks" src="../media/INTRO.mp3"></audio>
+
+    <script>
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/start', true);
+    xhr.send();
+
+    //AUDIO PLAY
+    xhr.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            var filePath = this.responseText;
+            var audio = document.getElementById('assistant_speaks');
+            audio.src = filePath;
+            audio.load();
+            audio.oncanplaythrough = function() {
+                this.play();
+            }
+        }
+    }
+    </script>
+
+</body>
+</html>

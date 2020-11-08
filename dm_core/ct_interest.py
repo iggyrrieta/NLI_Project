@@ -81,7 +81,8 @@ class ConversationTracker:
         # Utterance id
         self._id += 1
         # Add to history
-        self.history.append(f"{self._id} - {self.last_input}")
+        self.history.append(f"{self._id} - AGENT - {self.next_agent_action}")
+        self.history.append(f"{self._id} - YOU - {self.last_input}")
         # Go analyze this text
         self.publish(self.info, entity)
 
