@@ -145,7 +145,7 @@ class DMCore:
         # Instiantiate Speech recognition
         self.speechrecognition = SPCore(path)
         # First talk: INTRO
-        self.speechrecognition.assistant_voice("Hello, I am a guide tour assistant. How can I help you?")
+        self.speechrecognition.assistant_voice("Hello, I am a Tourist Guide Assistant. How can I help you?")
 
         while (1):
 
