@@ -5,30 +5,31 @@ import json
 import wikipedia
 
 # ROOT FOLDER : Make things easier setting the root folder as the origin
-#root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-#sys.path.insert(0, root_path)
+# root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+# sys.path.insert(0, root_path)
 
 # Utils
 import dm_core.utils as utils
+
 
 class ConversationTracker:
     """Tracking of conversations."""
 
     def __init__(self):
         self.c_started = False  # Check if conversation started
-        self.last_input = ''    # Last text from the client
+        self.last_input = ''  # Last text from the client
         self.last_entity = ''
         self.request_out = ''
         self.gmaps_info = None  # Info obtained from google maps
-        self.wiki_info = None   # Info obtained from wikipedia
-        self.info = None        # info variable, which contains all CT data
-        self._id = 0            # self.info idenfitier
+        self.wiki_info = None  # Info obtained from wikipedia
+        self.info = None  # info variable, which contains all CT data
+        self._id = 0  # self.info idenfitier
 
         # Agent, based on inform/request/action methodology
         self.agent_slots = ['date', 'info']
-        self.agent_inform = self.agent_slots 
-        self.agent_request = self.agent_slots 
-        self.agent_actions = []   # All the actions of the agent
+        self.agent_inform = self.agent_slots
+        self.agent_request = self.agent_slots
+        self.agent_actions = []  # All the actions of the agent
         self.previous_agent_action = None  # Defines previous action to be performed by the agent, action
         self.next_agent_action = None  # Defines next action to be performed by the agent, action
         self.next_agent_action_type = 'request'  # Defines what type of action is performing the agent
@@ -59,12 +60,12 @@ class ConversationTracker:
     def _wiki_info(self, text):
         ''' WIKIPEDIA API connection.
         '''
-        #self.wiki_info  = utils.del_stopwords(wikipedia.summary(text))
-        self.wiki_info  = wikipedia.summary(text)
-        
+        # self.wiki_info  = utils.del_stopwords(wikipedia.summary(text))
+        self.wiki_info = wikipedia.summary(text, sentences=1)
+
     def new_utterance(self, text, entity):
         ''' Receive new text entry
-        '''     
+        '''
         self.c_started = True
         self.last_input = text
         self.last_entity = [i.text for i in entity]
@@ -76,7 +77,7 @@ class ConversationTracker:
             self._wiki_info(self.last_entity[0])
 
         # Utterance id
-        self._id += 1 
+        self._id += 1
         # Add to history
         self.history.append(f"{self._id} - {self.last_input}")
         # Go analyze this text
@@ -86,10 +87,10 @@ class ConversationTracker:
         '''Publish all processed info
            to be used by dm subscribe
         '''
-        #for ent in self.last_entity:
+        # for ent in self.last_entity:
         #    if ent[0] == 'something related to date time in spacy': # TODO CHANGE THIS
         #        self.agent_actions[0]['date'] = ''
-        
+
         # slot not detected
         if self.next_agent_action_type == 'request':
             if self.agent_actions[0]['date'] == '':
@@ -97,16 +98,16 @@ class ConversationTracker:
                 self.next_agent_action_type = 'inform'
             # Next step, look for the other slot
             elif self.agent_actions[1]['info'] == '':
-                self.next_agent_action = f"Do you want me to explain you some info from {self.gmaps_info['name']}?"
+                self.next_agent_action = f"Do you want me to give you some information about {self.gmaps_info['name']}?"
                 self.next_agent_action_type = 'inform'
             else:
                 # END OF THE DEMO
                 self.next_agent_action = "Bye"
 
-        elif self.next_agent_action_type == 'inform': 
+        elif self.next_agent_action_type == 'inform':
             if self.agent_actions[0]['date'] == '':
                 self.agent_actions[0]['date'] = self.last_input
-                self.next_agent_action = f"{self.gmaps_info['name']} is now {self.gmaps_info['opening_hours']}"
+                self.next_agent_action = f"{self.gmaps_info['name']} is now {'open!' if self.gmaps_info['opening_hours'] == True else 'closed, sorry. You can visit some other day!'}"
                 self.next_agent_action_type = 'request'
             # Next step, look for the other slot
             elif self.agent_actions[1]['info'] == '':
@@ -120,7 +121,7 @@ class ConversationTracker:
         '''
         for text in self.history:
             print(text)
-    
+
     def reset(self):
         ''' Remove conversation
         '''

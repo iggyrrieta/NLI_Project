@@ -1,8 +1,8 @@
 
 import speech_recognition as sr # importing speech recognition package from google api 
 import playsound # to play saved mp3 file 
-from gtts import gTTS # google text to speech 
-import requests # to get API responses
+from gtts import gTTS # google text to speech
+
 
 class SPCore:
     def __init__(self, path):
@@ -17,10 +17,10 @@ class SPCore:
             self.num += 1
             print("Tour Guide Assistant : ", output) 
         
-            toSpeak = gTTS(text = output, lang ='en', slow = False) 
+            to_speak = gTTS(text = output, lang ='en', slow = False)
             # saving the audio file given by google text to speech 
             file = f"{self.path}/Audio_{str(self.num)}.mp3"  
-            toSpeak.save(file) 
+            to_speak.save(file)
             
             # playsound package is used to play the same file. 
             playsound.playsound(file, True)  
@@ -32,18 +32,18 @@ class SPCore:
         
     def get_audio(self): 
     
-        rObject = sr.Recognizer() 
+        r_object = sr.Recognizer()
         audio = '' 
     
         with sr.Microphone() as source: 
             print("Speak (5sec to speak)...") 
             
             # recording the audio using speech recognition 
-            audio = rObject.listen(source, phrase_time_limit = 3)
+            audio = r_object.listen(source, phrase_time_limit = 3)
     
         try: 
     
-            text = rObject.recognize_google(audio, language ='en-US') 
+            text = r_object.recognize_google(audio, language ='en-US')
             print("You : ", text) 
             return text 
     
