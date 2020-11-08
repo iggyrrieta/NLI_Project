@@ -59,9 +59,11 @@ class ConversationTracker:
         '''
 
         # Remove parenthesis info from Wikipedia summary as it always include original language pronunciation
-        wiki_aux = wikipedia.summary(text, sentences=1)
-        regex = re.compile(".*?\((.*?)\)")
-        self.wiki_info = re.findall(regex, wiki_aux)
+        wiki_aux = wikipedia.summary(text, sentences=2)
+        start = wiki_aux.find('(')
+        end = wiki_aux.find(')')
+
+        self.wiki_info = wiki_aux.replace(wiki_aux[start:end + 1], '')
 
     def new_utterance(self, text, entity):
         ''' Receive new text entry
