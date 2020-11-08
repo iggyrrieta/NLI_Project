@@ -80,6 +80,7 @@ class DMCore:
             self.all_intents_probability = probabilities
 
             self.detected_entities = nlu.extracted_entities
+            
         else:
             self.predicted = 'Intent not found'
             self.all_intents_probability = None
@@ -138,10 +139,17 @@ class DMCore:
         '''Subscribtion to topic self.conversation_tracker
            Get the current info from that topic
         '''
-        # TODO I CREATED THIS TO GET WHAT WE WANT FROM THE CT
-        topic=self.conversation_tracker
-        
+        while (1):
 
+            agent_action = self.conversation_tracker.next_agent_action
+            self.conversation_tracker.agent_response(agent_action)
+
+            if agent_action in ['goodbye', 'exit']:
+                break
+            else:
+                pass
+        self.agent_response(f"Bye")
+        
 
     def new_utterance(self, client_in):
         self.user_utterance = client_in

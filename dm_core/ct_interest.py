@@ -16,16 +16,20 @@ class ConversationTracker:
     def __init__(self):
         self.c_started = False  # Check if conversation started
         self.last_input = ''    # Last text from the client
+        self.last_entity = ''
+        self.request_out = ''
         self.gmaps_info = None  # Info obtained from google maps
         self.wiki_info = None   # Info obtained from wikipedia
         self.info = None        # info variable, which contains all CT data
         self._id = 0            # self.info idenfitier
 
         # Agent, based on inform/request/action methodology
-        self.agent_slots = ['art', 'music', 'sport', 'culture']
+        self.agent_slots = ['date', 'info']
         self.agent_inform = self.agent_slots 
         self.agent_request = self.agent_slots 
         self.agent_actions = []   # All the actions of the agent
+        self.next_agent_action = None  # Defines next action to be performed by the agent, action
+        self.next_agent_action_type = None  # Defines what type of action is performing the agent
 
         # Initialize the required slots
         for slot in self.agent_request:
@@ -61,13 +65,12 @@ class ConversationTracker:
         '''     
         self.c_started = True
         self.last_input = text
+        self.last_entity = [i.text for i in entity]
         # Get gmaps API results
-        self._gmaps_info(text)
+        self._gmaps_info(self.last_entity[0])
         # Get wikipedia API results
-        self._wiki_info(text)
-        
-        # TODO combine both wiki and gmaps info in 1 structure
-        
+        self._wiki_info(self.last_entity[0])
+
         # Utterance id
         self._id += 1 
         # Add to history
@@ -79,12 +82,21 @@ class ConversationTracker:
         '''Publish all processed info
            to be used by dm subscribe
         '''
-        # TODO I HAVE NO IDEA HOW TO EXTRACT THE INFO I WANT, I AM NOT GETTING 
-        # ANY ENTITY WHEN TESTING!!!
-
-        #If I receive entities then we can do samething similar implemented as a test in dm
-        pass
-
+        for ent in self.last_entity:
+            if ent[0] == 'something related to date time in spacy': # TODO CHANGE THIS
+                self.agent_actions[0]['date'] = ent[1]
+        
+        # slot not detected
+        self.next_agent_action_type = 'request'
+        if self.agent_actions[0]['date'] == '':
+            self.next_agent_action = f'Sure thing! I need some extra information, when do you want to visit {self.last_entity[0]}?'
+        # Next step, look for the other slot
+        elif self.agent_actions[0]['info'] == '':
+            self.next_agent_action = f'Do you want me to explain you some info from {self.last_entity[0]}?'
+        else:
+            self.next_agent_action_type = 'inform'
+            # TODO ELABORATE THE INFO SLOT
+            pass
 
     def print_history(self):
         ''' Print current history
@@ -98,6 +110,8 @@ class ConversationTracker:
         self.history = []
         self.c_started = False
         self.last_input = ''
+        self.last_entity = ''
+        self.request_out = ''
         self.gmaps_info = None
         self.wiki_info = None
         self.info = None
