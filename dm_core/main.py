@@ -36,6 +36,9 @@ class DMCore:
         self.next_agent_action_type = None  # Defines what type of action is performing the agent
         self.agent_actions = []   # All the actions of the agent
         self.detected_entities = None
+        self.manual_enable = False
+        self.manual_in = ''
+        self.history = []
 
         # Access to database
         self.root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
@@ -149,11 +152,21 @@ class DMCore:
 
         while (1):
 
-            client_in = self.speechrecognition.get_audio()
+            # Select manual input or audio
+            if self.manual_enable:
+                if self.manual_in != '':
+                    client_in = self.manual_in
+                    self.manual_in = ''
+            else:
+                client_in = self.speechrecognition.get_audio()
+                
             # We start conversation with client_in input
             self.new_utterance(client_in)
             agent_action = self.conversation_tracker.next_agent_action
 
+	    # Get history
+            self.history = self.conversation_tracker.history
+            
             if agent_action in ['Bye', 'goodbye', 'exit']:
                 break
             else:
@@ -162,6 +175,11 @@ class DMCore:
         self.speechrecognition.assistant_voice("Bye")
         
 
+    def manual_input(self, client_input):
+        '''Just an input from Flask application
+        '''
+        self.manual_in = client_input
+        
     def new_utterance(self, client_in):
         self.user_utterance = client_in
 
