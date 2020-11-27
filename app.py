@@ -4,6 +4,7 @@ from datetime import datetime # to create folder with date
 import sys
 import os
 
+
 # ROOT FOLDER : Make things easier setting the root folder as the origin
 root_path = os.getcwd()
 sys.path.insert(0, f'{root_path}/NLI_Project')
@@ -12,7 +13,7 @@ sys.path.insert(0, f'{root_path}/NLI_Project')
 from dm_core.main import DMCore
 
 #############################################
-# GLOBAL: CREATE LOCAL FOLDER WITH PERMISSION         
+# GLOBAL: CREATE LOCAL FOLDER WITH PERMISSION
 #############################################
 now = datetime.now()
 dt_string = now.strftime("%d%m%Y_%H%M") # Date
@@ -39,12 +40,10 @@ def flow():
     # TODO: Create a start() function inside DM
     # This function should be connected to sp_recognition module
     # and get the audio converted to text to start flow.
-    manager.start(path)  
+    manager.start(path)
 
 #############################################
 # MAIN
 #############################################
 if __name__ == "__main__":
-    app.run() 
-
-    
+    app.run()

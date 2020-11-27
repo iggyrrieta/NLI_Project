@@ -20,7 +20,7 @@ class ConversationTracker:
         self.gmaps_info = None  # Info obtained from google maps
         self.wiki_info = None  # Info obtained from wikipedia
         self.info = None  # info variable, which contains all CT data
-        self._id = 0  # self.info idenfitier
+        self._id = 0  # self.info identifier
 
         # Agent, based on inform/request/action methodology
         self.agent_slots = ['date', 'info']
