@@ -1,4 +1,3 @@
-from numpy.lib.function_base import place
 import requests
 import random
 from string import Template
@@ -130,7 +129,7 @@ class ConversationTracker:
         # slot not detected
         if self.next_agent_action_type == 'request':
             if self.agent_actions[0]['location'] == '':
-                self.next_agent_action = f"Okay, what location do you want me to search a resturant in?"
+                self.next_agent_action = f"Okay, what location do you want me to search a restaurant in?"
                 self.next_agent_action_type = 'inform'
             # Next step, look for the other slot
             elif self.agent_actions[1]['cuisine'] == '':
@@ -146,7 +145,7 @@ class ConversationTracker:
 
                 self._get_city_id(self.last_input)
 
-                self.next_agent_action = f"Okay great, so I shall look for resturants around {self.place}. "
+                self.next_agent_action = f"Okay great, so I shall look for restaurants around {self.place}. "
                 self.next_agent_action += f"Available cuisines are: {', '.join(self.available_cuisines.keys())}. "
                 self.next_agent_action += "What cuisine do you want to try?"
                 self.next_agent_action_type = 'inform'
