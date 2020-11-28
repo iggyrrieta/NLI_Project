@@ -45,19 +45,6 @@ class DMCore:
         data = pd.read_csv(self.db_path, delimiter=',')
         self.agent_intents =['greet', 'goodbye', 'restaurant_search', 'interest_search']
 
-        # TODO --- This code should be moved to the corresponding Conversational Tracker ---
-        # Logic is really similar for every CT we use, detect missing slots and manage actions to ask them to the user
-        # Doing it here for integration purposes and to have a better idea of the loop
-
-        self.agent_inform_slots_restaurant = ['cuisine', 'location']
-        self.agent_request_slots_restaurant = ['cuisine', 'location']
-
-        # Initialize the required slots for restaurant_search intent
-        for slot in self.agent_request_slots_restaurant:
-            self.agent_actions.append({slot: ''})
-
-        # ----------------------------------------------------------------------------
-
     def __repr__(self):
         return '\n'.join([
             'DIALOGUE MANAGER',
@@ -83,7 +70,7 @@ class DMCore:
             self.all_intents_probability = probabilities
 
             self.detected_entities = nlu.extracted_entities
-            
+
         else:
             self.predicted = 'Intent not found'
             self.all_intents_probability = None
@@ -107,29 +94,10 @@ class DMCore:
 
             if self.predicted == 'restaurant_search':
                 # Prior doing the search itself, we should complete all the slots needed
-                # i.e., restaurant_search needs cuisine and location slots to perform the search
+                # i.e., restaurant_search needs cuisine and location slots to perform the search properly
+                self.conversation_tracker = ct_restaurant()
+                self.conversation_tracker.start()
 
-                # --- All this should be done inside the specific conversational tracker ---
-                # self.conversation_tracker = ct_restaurant()
-
-                # Check if all the required slots are completed
-                for ent in self.detected_entities:
-                    if ent.label_ == 'NORP':
-                       self.agent_actions[0]['cuisine'] = ent.text
-
-                # Cuisine slot not detected
-                self.next_agent_action_type = 'request'
-                if self.agent_actions[0]['cuisine'] == '':
-                    self.next_agent_action = 'Sure thing! I need some extra information, what type of cuisine are you looking for?'
-                # Next step, look for the location slot
-                elif self.agent_actions[0]['location'] == '':
-                    self.next_agent_action = 'Are you looking for a particular location?'
-                # All slots completed, moving to API search
-                else:
-                    self.next_agent_action_type = 'inform'
-                    pass
-                    # Perform API search with all the data
-                # ------------------------------------------------------------------------
             if self.predicted == 'interest_search':
                 # Prior doing the search itself, we should complete all the slots needed
                 # i.e., interest_search needs interest and location slots to perform the search properly
@@ -160,7 +128,7 @@ class DMCore:
                 self.speechrecognition.assistant_voice(agent_action)
 
         self.speechrecognition.assistant_voice("Bye")
-        
+
 
     def new_utterance(self, client_in):
         self.user_utterance = client_in
@@ -170,9 +138,9 @@ class DMCore:
             # Get intent. This verifications process does the following:
             #  - Call function '_get_intent()' which is supposed to be called
             #    in order to get the intent of the conversation.
-            #  - In case the intent doesn't exist we don't set the conversation 
+            #  - In case the intent doesn't exist we don't set the conversation
             #    to True and we wait to get another input to check if we can
-            #    get a good intent. 
+            #    get a good intent.
             #  - In case the intent exists then we call the function '_get_ct'
             #    that check the intent and calls the correct conversation tracker.
             #    In case the intent is a 'greet' or 'goodbye' it just doesn't set 'self.ct'
