@@ -1,8 +1,10 @@
 
+from subprocess import check_output
 import speech_recognition as sr # importing speech recognition package from google api
 import playsound # to play saved mp3 file
 from gtts import gTTS # google text to speech
 import subprocess # to call the `say` command
+import sys
 
 
 class SPCore:
@@ -27,7 +29,12 @@ class SPCore:
             # playsound.playsound(file, True)
             # return {file}
 
-            subprocess.check_output(["say", f"{output}"])
+            if sys.platform.startswith('darwin'):
+                subprocess.check_output(["say", f"{output}"])
+            elif sys.platform.startswith('linux'):
+                subprocess.check_output(["espeak", f"{output}"])
+            else:
+                sys.exit(-1)
 
         except Exception as e:
             print("An error occurred when agent trying to speak", e)

@@ -7,6 +7,7 @@ import re
 
 # Utils
 import dm_core.utils as utils
+from nlg_core.main import interest_nlg
 
 
 class ConversationTracker:
@@ -96,11 +97,11 @@ class ConversationTracker:
         # slot not detected
         if self.next_agent_action_type == 'request':
             if self.agent_actions[0]['date'] == '':
-                self.next_agent_action = f"Sure thing! I need some extra information, when do you want to visit {self.gmaps_info['name']}?"
+                self.next_agent_action = interest_nlg.request_time.format(place=self.gmaps_info['name'])
                 self.next_agent_action_type = 'inform'
             # Next step, look for the other slot
             elif self.agent_actions[1]['info'] == '':
-                self.next_agent_action = f"Do you want me to give you some information about {self.gmaps_info['name']}?"
+                self.next_agent_action = interest_nlg.request_more_info(place=self.gmaps_info['name'])
                 self.next_agent_action_type = 'inform'
             else:
                 # END OF THE DEMO
@@ -109,12 +110,16 @@ class ConversationTracker:
         elif self.next_agent_action_type == 'inform':
             if self.agent_actions[0]['date'] == '':
                 self.agent_actions[0]['date'] = self.last_input
-                self.next_agent_action = f"{self.gmaps_info['name']} is now {'open!' if self.gmaps_info['opening_hours'] == True else 'closed, sorry. You can visit some other day!'}"
+                if self.gmaps_info['opening_hours']:
+                    self.next_agent_action = interest_nlg.inform_open.format(place=self.gmaps_info['name'])
+                else:
+                    self.next_agent_action = interest_nlg.inform_closed.format(place=self.gmaps_info['name'])
+
                 self.next_agent_action_type = 'request'
             # Next step, look for the other slot
             elif self.agent_actions[1]['info'] == '':
                 self.agent_actions[1]['info'] = self.last_input
-                self.next_agent_action = f'Ok so.. {self.wiki_info}'
+                self.next_agent_action = interest_nlg.tell_me_more.format(self.wiki_info)
                 self.next_agent_action_type = 'request'
             pass
 
