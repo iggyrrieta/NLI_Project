@@ -149,7 +149,7 @@ class ConversationTracker:
                 self.next_agent_action = restaurant_nlg.inform_place.format(place=self.place)
                 self.next_agent_action += restaurant_nlg.inform_cuisines.format(cuisines=', '.join(
                     self.available_cuisines.keys()))
-                self.next_agent_action += restaurant_nlg.request_cuisines
+                self.next_agent_action += restaurant_nlg.request_cuisine
                 self.next_agent_action_type = 'inform'
             # Next step, look for the other slot
             elif self.agent_actions[1]['cuisine'] == '':
