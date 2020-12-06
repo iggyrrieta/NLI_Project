@@ -42,6 +42,7 @@ class DMCore:
         self.db_path = f'{self.root_path}/NLI_Project/data/{db_name}'
 
         # Read db file
+        print(self.db_path)
         data = pd.read_csv(self.db_path, delimiter=',')
         self.agent_intents =['greet', 'goodbye', 'restaurant_search', 'interest_search']
 

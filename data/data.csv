@@ -4,6 +4,7 @@ greet,hello
 greet,morning!
 goodbye,bye!
 goodbye,see you
+restaurant_search,i want to eat out
 restaurant_search,Suggest me some mexican restaurants
 restaurant_search,im looking for restaurants
 restaurant_search,is there any chinese restaurants?
