@@ -8,6 +8,18 @@ import re
 # Utils
 import dm_core.utils as utils
 from nlg_core.main import interest_nlg
+import os
+import logging
+
+#==============================================================================
+#   LOGGER
+#
+# This is the ct_interest logger
+#==============================================================================
+root_folder = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
+logging.config.fileConfig(f"{root_folder}/data/log.ini")
+logger = logging.getLogger('ct_interest_logger')
+#==============================================================================
 
 
 class ConversationTracker:
@@ -48,7 +60,7 @@ class ConversationTracker:
     def start(self):
         ''' Start conversation tracker
         '''
-        self.history = []
+        logger.info("----------NEW CT_INTEREST TRACK STARTED----------")
 
     def _gmaps_info(self, text):
         ''' GMAPS API connection.
@@ -85,8 +97,8 @@ class ConversationTracker:
 
         # Utterance id
         self._id += 1
-        # Add to history
-        self.history.append(f"{self._id} - {self.last_input}")
+        # Add log
+        logger.info(f"{self._id} - {self.last_input}")
         # Go analyze this text
         self.publish(self.info, entities, prediction)
 
@@ -130,17 +142,17 @@ class ConversationTracker:
                     self.reset()
                 else:
                     self.agent_actions[0]['info'] = self.last_input
-                    self.next_agent_action = interest_nlg.tell_me_more.format(self.wiki_info)
+                    self.next_agent_action = interest_nlg.tell_me_more.format(text=self.wiki_info)
                     self.next_agent_action_type = 'request'
                     self.agent_actions[1]['info'] = self.wiki_info
 
-    def print_history(self):
+    def get_history(self):
         """
-        Prints current history
-        :return: console printed data
+        Connection to log file to check previous iterations
         """
-        for text in self.history:
-            print(text)
+        #TODO: Add connection to log, to check previous iterations
+        # This can be used to easily check all iterations. It is as it was
+        # before but now we got all organized and saved locally
 
     def conversation_started(self):
         """
