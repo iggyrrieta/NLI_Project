@@ -21,4 +21,5 @@ media/chat_**
 
 # data
 data/.~__pycache__
-data/.~lock.data.csv# 
+data/.~lock.data.csv#
+data/*.log
