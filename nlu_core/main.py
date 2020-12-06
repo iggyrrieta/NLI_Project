@@ -76,12 +76,12 @@ class NLUCore:
         :return: A list containing all the entities recognized, set to the class proeprties
         """
         doc = self.spacy_nlp(text)
-        for ent in doc.ents:
-            print(ent, ent.label_)
+        #for ent in doc.ents:
+            #print(ent, ent.label_)
 
         pos_tags_or_dobj = []
         for token in doc:
-            print(token.pos_, token.dep_)
+            #print(token.pos_, token.dep_)
             if token.pos_ == 'ADJ' or token.dep_ == 'dobj':
                 pos_tags_or_dobj.append(token.text)
 

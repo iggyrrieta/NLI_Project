@@ -3,6 +3,18 @@ import random
 from string import Template
 from collections import defaultdict
 from nlg_core.main import restaurant_nlg
+import os
+import logging
+
+#==============================================================================
+#   LOGGER
+#
+# This is the ct_restaurant logger
+#==============================================================================
+root_folder = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
+logging.config.fileConfig(f"{root_folder}/data/log.ini")
+logger = logging.getLogger('ct_restaurant_logger')
+#==============================================================================
 
 
 class ConversationTracker:
@@ -52,7 +64,7 @@ class ConversationTracker:
     def start(self):
         ''' Start conversation tracker
         '''
-        self.history = []
+        logger.info("----------NEW CT_RESTAURANT TRACK STARTED----------")
 
     def _get_city_id(self, place_name):
         ''' Call Zomato API to get `city_id`.
@@ -117,8 +129,8 @@ class ConversationTracker:
 
         # Increment utterance id.
         self._id += 1
-        # Append to history.
-        self.history.append(f"{self._id} - {self.last_input}")
+        # Append to log
+        logger.info(f"{self._id} - {self.last_input}")
         # Analyze text.
         self.publish(self.info, entities)
 
@@ -171,13 +183,13 @@ class ConversationTracker:
                     self.next_agent_action_type = 'request'
             pass
 
-    def print_history(self):
+    def get_history(self):
         """
-        Prints current history
-        :return: console printed data
+        Connection to log file to check previous iterations
         """
-        for text in self.history:
-            print(text)
+        #TODO: Add connection to log, to check previous iterations
+        # This can be used to easily check all iterations. It is as it was
+        # before but now we got all organized and saved locally
 
     def conversation_started(self):
         """

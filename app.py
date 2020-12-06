@@ -3,7 +3,7 @@ from datetime import datetime # to create folder with date
 
 import sys
 import os
-
+import logging
 
 # ROOT FOLDER : Make things easier setting the root folder as the origin
 root_path = os.getcwd()
@@ -26,6 +26,12 @@ os.chmod(path, 0o777) # Full access
 # FLASK WEB APP
 #############################################
 app = Flask(__name__)
+# Iñaki: Disable log. If it is enabled then
+# flask log is copied to our dm_main.log...
+# So, for testing go yourself to http://127.0.0.1:5000/
+log = logging.getLogger('werkzeug')
+log.disabled = True
+app.logger.disabled = True
 
 @app.route("/")
 def home():
@@ -47,3 +53,4 @@ def flow():
 #############################################
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+

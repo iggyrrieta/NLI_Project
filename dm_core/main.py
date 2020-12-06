@@ -1,10 +1,11 @@
 import os
 import sys
 import pandas as pd
+import logging.config
 
 # ROOT FOLDER : Make things easier setting the root folder as the origin
-# root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-# sys.path.insert(0, root_path)
+#root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+#sys.path.insert(0, root_path)
 
 # SP
 from sp_recognition.main import SPCore
@@ -14,6 +15,15 @@ from nlu_core.main import NLUCore
 from dm_core.ct_interest import ConversationTracker as ct_interest
 from dm_core.ct_restaurant import ConversationTracker as ct_restaurant
 
+#==============================================================================
+#   LOGGER
+#
+# This is the main logger
+#==============================================================================
+root_folder = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
+logging.config.fileConfig(f"{root_folder}/data/log.ini")
+logger = logging.getLogger('main_logger')
+#==============================================================================
 
 class DMCore:
     """Agent that interacts with the user.
@@ -42,7 +52,6 @@ class DMCore:
         self.db_path = f'{self.root_path}/NLI_Project/data/{db_name}'
 
         # Read db file
-        print(self.db_path)
         data = pd.read_csv(self.db_path, delimiter=',')
         self.agent_intents = ['greet', 'goodbye', 'restaurant_search', 'interest_search', 'yes', 'no']
 
@@ -109,7 +118,7 @@ class DMCore:
         else:
             self.conversation_tracker = None
 
-    def start(self, path):
+    def start(self, path=None):
         '''Subscribtion to topic self.conversation_tracker
            Get the current info from that topic
         '''
@@ -117,12 +126,14 @@ class DMCore:
         # self.speechrecognition = SPCore(path)
         # First talk: INTRO
         # self.speechrecognition.assistant_voice("Hello, I am a Tourist Guide Assistant. How can I help you?")
-        print("Hello, I am a Tourist Guide Assistant. How can I help you?")
+        logger.info("----------NEW CONEVERSATION STARTED----------")
+        logger.info("[AGENT] Hello, I am a Tourist Guide Assistant. How can I help you?")
 
         while (1):
 
             # client_in = self.speechrecognition.get_audio()
             client_in = input()
+            logger.info(f"[CLIENT] {client_in}")
             # We start conversation with client_in input
             self.new_utterance(client_in)
             agent_action = self.conversation_tracker.next_agent_action
@@ -131,10 +142,12 @@ class DMCore:
                 break
             else:
                 # self.speechrecognition.assistant_voice(agent_action)
-                print(agent_action)
+                #print(self.conversation_tracker)
+                logger.info(f"[AGENT] {agent_action}")
 
         # self.speechrecognition.assistant_voice("Bye")
-        print("Bye")
+        logger.info(f"[AGENT] Bye")
+        logger.info("---------------------------------------------")
 
     def new_utterance(self, client_in):
         """
