@@ -2,6 +2,7 @@ import requests
 import random
 from string import Template
 from collections import defaultdict
+from nlg_core.main import restaurant_nlg
 
 
 class ConversationTracker:
@@ -103,12 +104,12 @@ class ConversationTracker:
             self.nearby_restaurant = content["restaurants"][0]
 
 
-    def new_utterance(self, text, entity):
+    def new_utterance(self, text, entities, pos_dobj, prediction):
         ''' Receive new text entry
         '''
         self.c_started = True
         self.last_input = text
-        self.last_entity = [i.text for i in entity]
+        self.last_entity = [i.text for i in entities]
 
         # if self.next_agent_action_type == 'request':
         #     self._get_city_id(self.last_entity[0])
@@ -119,7 +120,7 @@ class ConversationTracker:
         # Append to history.
         self.history.append(f"{self._id} - {self.last_input}")
         # Analyze text.
-        self.publish(self.info, entity)
+        self.publish(self.info, entities)
 
     def publish(self, text, ent):
         '''Publish all processed info
@@ -129,11 +130,11 @@ class ConversationTracker:
         # slot not detected
         if self.next_agent_action_type == 'request':
             if self.agent_actions[0]['location'] == '':
-                self.next_agent_action = f"Okay, what location do you want me to search a restaurant in?"
+                self.next_agent_action = restaurant_nlg.request_location
                 self.next_agent_action_type = 'inform'
             # Next step, look for the other slot
             elif self.agent_actions[1]['cuisine'] == '':
-                self.next_agent_action = "What cuisine do you want to try?"
+                self.next_agent_action = restaurant_nlg.request_cuisine
                 self.next_agent_action_type = 'inform'
             else:
                 # END OF THE DEMO
@@ -145,16 +146,17 @@ class ConversationTracker:
 
                 self._get_city_id(self.last_input)
 
-                self.next_agent_action = f"Okay great, so I shall look for restaurants around {self.place}. "
-                self.next_agent_action += f"Available cuisines are: {', '.join(self.available_cuisines.keys())}. "
-                self.next_agent_action += "What cuisine do you want to try?"
+                self.next_agent_action = restaurant_nlg.inform_place.format(place=self.place)
+                self.next_agent_action += restaurant_nlg.inform_cuisines.format(cuisines=', '.join(
+                    self.available_cuisines.keys()))
+                self.next_agent_action += restaurant_nlg.request_cuisine
                 self.next_agent_action_type = 'inform'
             # Next step, look for the other slot
             elif self.agent_actions[1]['cuisine'] == '':
                 self.agent_actions[1]['cuisine'] = self.last_input
 
                 if self.last_input.lower() not in self.available_cuisines.keys():
-                    self.next_agent_action = "Please select one of the available cuisines!"
+                    self.next_agent_action = restaurant_nlg.unavailable_cuisine
                     self.next_agent_action_type = "inform"
                 else:
                     self._get_nearby_restaurants(self.available_cuisines[self.last_input.lower()])
@@ -162,15 +164,27 @@ class ConversationTracker:
                     place = self.nearby_restaurant["restaurant"]["location"]["address"]
                     timings = self.nearby_restaurant["restaurant"]["timings"]
 
-                    self.next_agent_action = f"You may visit {name}, it is located at {place}. The timings are {timings}."
+                    self.next_agent_action = restaurant_nlg.inform_restaurant.format(
+                                                name=name,
+                                                place=place,
+                                                timings=timings)
                     self.next_agent_action_type = 'request'
             pass
 
     def print_history(self):
-        ''' Print current history
-        '''
+        """
+        Prints current history
+        :return: console printed data
+        """
         for text in self.history:
             print(text)
+
+    def conversation_started(self):
+        """
+        Get whether if CT has started or reset
+        :return:
+        """
+        return self.c_started
 
     def reset(self):
         ''' Remove conversation

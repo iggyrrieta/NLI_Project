@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "nli_project"
+version = "0.1.0"
+description = ""
+authors = ["NLI <nli@upf.edu>"]
+
+[tool.poetry.dependencies]
+python = "3.8.6"
+Flask = "^1.1.2"
+SpeechRecognition = "^3.8.1"
+playsound = "^1.2.2"
+gTTS = "^2.2.1"
+pyobjc = "^7.0.1"
+PyAudio = "^0.2.11"
+pandas = "^1.1.4"
+sklearn = "^0.0"
+spacy = "^2.3.4"
+jupyter = "^1.0.0"
+jupyterlab = "^2.2.9"
+textacy = "^0.10.1"
+wikipedia = "^1.4.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

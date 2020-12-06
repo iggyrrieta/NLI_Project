@@ -7,6 +7,7 @@ import re
 
 # Utils
 import dm_core.utils as utils
+from nlg_core.main import interest_nlg
 
 
 class ConversationTracker:
@@ -70,7 +71,8 @@ class ConversationTracker:
         '''
         self.c_started = True
         self.last_input = text
-        self.last_entity = [i.text for i in entities] if entities else [p for p in pos_dobj] #TODO: change to return full token to analyze the type here
+        self.last_entity = [i.text for i in entities] if entities else [p for p in
+                                                                        pos_dobj]  # TODO: change to return full token to analyze the type here
 
         if prediction not in ['yes', 'no']:
             if self.next_agent_action_type == 'inform' and len(self.last_entity) > 0:
@@ -79,7 +81,7 @@ class ConversationTracker:
                 # Get wikipedia API results
                 self._wiki_info(self.last_entity[0])
             else:
-                pass #TODO: raise warning of not detected entity, handle not detected entity as new request to user
+                pass  # TODO: raise warning of not detected entity, handle not detected entity as new request to user
 
         # Utterance id
         self._id += 1
@@ -89,16 +91,20 @@ class ConversationTracker:
         self.publish(self.info, entities, prediction)
 
     def publish(self, text, ent, prediction):
-        '''Publish all processed info
-           to be used by dm subscribe
-        '''
+        """
+        Publish all processed info to be used by DM subscribe
+        :param text:
+        :param ent:
+        :param prediction:
+        :return:
+        """
         if self.next_agent_action_type == 'request':
             if prediction != 'no':
                 if self.agent_actions[1]['place'] != '':
-                    self.next_agent_action = f"Do you want me to give you some information about {self.agent_actions[2]['type']}?"
+                    self.next_agent_action = interest_nlg.request_more_info.format(place=self.agent_actions[2]['type'])
                     self.next_agent_action_type = 'inform'
             else:
-                self.next_agent_action = "Oh, no problem then. Is there anything else I can help you with?"
+                self.next_agent_action = interest_nlg.negative_response.format()
                 self.reset()
 
         elif self.next_agent_action_type == 'inform':
@@ -107,38 +113,46 @@ class ConversationTracker:
                 options = self.gmaps_info['options']
 
                 if len(options) > 0:
-                    self.next_agent_action = f"I found {len(options)} place{'s' if len(options) > 1 else ''}. The " \
-                                             f"closest one is {options[0]['name']}, located at {options[0]['formatted_address']}"
+                    self.next_agent_action = interest_nlg.inform_options.format(number_opt=len(options),
+                                                                         opt_name=options[0]['name'],
+                                                                         opt_address=options[0]['formatted_address'])
                     self.agent_actions[1]['place'] = options[0]['name']
                     self.agent_actions[2]['type'] = self.last_entity[0]
                     self.next_agent_action_type = 'request'
                 else:
-                    self.next_agent_action = f"Ok, this is embarrassing. I could not find any places related to what " \
-                                             f"you are looking for. Can you re-phrase it for me? "
+                    self.next_agent_action = interest_nlg.interest_not_found.format()
                     self.next_agent_action_type = 'inform'
 
             # Next step, look for the other slot
             elif self.agent_actions[0]['info'] == '':
                 if prediction == 'no':
-                    self.next_agent_action = "Oh, no problem then. Is there anything else I can help you with?"
+                    self.next_agent_action = interest_nlg.negative_response.format()
                     self.reset()
                 else:
                     self.agent_actions[0]['info'] = self.last_input
-                    self.next_agent_action = f'Ok so.. {self.wiki_info}'
+                    self.next_agent_action = interest_nlg.tell_me_more.format(self.wiki_info)
                     self.next_agent_action_type = 'request'
                     self.agent_actions[1]['info'] = self.wiki_info
 
     def print_history(self):
-        """ Print current history
+        """
+        Prints current history
+        :return: console printed data
         """
         for text in self.history:
             print(text)
 
     def conversation_started(self):
+        """
+        Get whether if CT has started or reset
+        :return:
+        """
         return self.c_started
 
     def reset(self):
-        """ Remove conversation
+        """
+        Reset conversation
+        :return:
         """
         self.history = []
         self.c_started = False

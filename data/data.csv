@@ -5,6 +5,7 @@ greet,morning!
 greet,hi there!
 goodbye,bye!
 goodbye,see you
+<<<<<<< HEAD
 goodbye,goodbye
 goodbye,later!
 yes,yeah sure
@@ -25,6 +26,7 @@ no,thats not ok
 no,not good option
 no,no thank you
 no,nope but thanks
+restaurant_search,i want to eat out
 restaurant_search,Suggest me some mexican restaurants
 restaurant_search,im looking for restaurants
 restaurant_search,is there any chinese restaurants?
