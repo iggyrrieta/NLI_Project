@@ -23,6 +23,7 @@ class NLUCore:
         self.label_encoder = None
         self.spacy_nlp = spacy.load('en_core_web_lg')
         self.extracted_entities = None
+        self.extracted_pos_dobj = None
 
         X, y = self.__pre_process_data()
         self.__initialize_classifier(X, y)
@@ -78,7 +79,14 @@ class NLUCore:
         for ent in doc.ents:
             print(ent, ent.label_)
 
+        pos_tags_or_dobj = []
+        for token in doc:
+            print(token.pos_, token.dep_)
+            if token.pos_ == 'ADJ' or token.dep_ == 'dobj':
+                pos_tags_or_dobj.append(token.text)
+
         self.extracted_entities = doc.ents
+        self.extracted_pos_dobj = pos_tags_or_dobj
 
     def predict_intent(self, text):
         """

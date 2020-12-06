@@ -2,8 +2,29 @@ intent,text
 greet,hi
 greet,hello
 greet,morning!
+greet,hi there!
 goodbye,bye!
 goodbye,see you
+goodbye,goodbye
+goodbye,later!
+yes,yeah sure
+yes,yes please
+yes,yeah why not
+yes,excellent yes! that look good
+yes,awesome thank you!
+yes,that would work
+yes,great nice plase you found there!
+yes,yeah looks good
+yes,thank you
+no,no thank you
+no,nope
+no,no need
+no,that wont work
+no,no that is not a good option
+no,thats not ok
+no,not good option
+no,no thank you
+no,nope but thanks
 restaurant_search,Suggest me some mexican restaurants
 restaurant_search,im looking for restaurants
 restaurant_search,is there any chinese restaurants?

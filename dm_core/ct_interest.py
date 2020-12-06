@@ -23,13 +23,13 @@ class ConversationTracker:
         self._id = 0  # self.info identifier
 
         # Agent, based on inform/request/action methodology
-        self.agent_slots = ['date', 'info']
+        self.agent_slots = ['info', 'place', 'type']
         self.agent_inform = self.agent_slots
         self.agent_request = self.agent_slots
         self.agent_actions = []  # All the actions of the agent
         self.previous_agent_action = None  # Defines previous action to be performed by the agent, action
         self.next_agent_action = None  # Defines next action to be performed by the agent, action
-        self.next_agent_action_type = 'request'  # Defines what type of action is performing the agent
+        self.next_agent_action_type = 'inform'  # Defines what type of action is performing the agent
 
         # Initialize the required slots
         for slot in self.agent_request:
@@ -65,68 +65,81 @@ class ConversationTracker:
 
         self.wiki_info = wiki_aux.replace(wiki_aux[start:end + 1], '')
 
-    def new_utterance(self, text, entity):
+    def new_utterance(self, text, entities, pos_dobj, prediction):
         ''' Receive new text entry
         '''
         self.c_started = True
         self.last_input = text
-        self.last_entity = [i.text for i in entity]
+        self.last_entity = [i.text for i in entities] if entities else [p for p in pos_dobj] #TODO: change to return full token to analyze the type here
 
-        if self.next_agent_action_type == 'request':
-            # Get gmaps API results
-            self._gmaps_info(self.last_entity[0])
-            # Get wikipedia API results
-            self._wiki_info(self.last_entity[0])
+        if prediction not in ['yes', 'no']:
+            if self.next_agent_action_type == 'inform' and len(self.last_entity) > 0:
+                # Get gmaps API results
+                self._gmaps_info(self.last_entity[0])
+                # Get wikipedia API results
+                self._wiki_info(self.last_entity[0])
+            else:
+                pass #TODO: raise warning of not detected entity, handle not detected entity as new request to user
 
         # Utterance id
         self._id += 1
         # Add to history
         self.history.append(f"{self._id} - {self.last_input}")
         # Go analyze this text
-        self.publish(self.info, entity)
+        self.publish(self.info, entities, prediction)
 
-    def publish(self, text, ent):
+    def publish(self, text, ent, prediction):
         '''Publish all processed info
            to be used by dm subscribe
         '''
-        # for ent in self.last_entity:
-        #    if ent[0] == 'something related to date time in spacy': # TODO CHANGE THIS
-        #        self.agent_actions[0]['date'] = ''
-
-        # slot not detected
         if self.next_agent_action_type == 'request':
-            if self.agent_actions[0]['date'] == '':
-                self.next_agent_action = f"Sure thing! I need some extra information, when do you want to visit {self.gmaps_info['name']}?"
-                self.next_agent_action_type = 'inform'
-            # Next step, look for the other slot
-            elif self.agent_actions[1]['info'] == '':
-                self.next_agent_action = f"Do you want me to give you some information about {self.gmaps_info['name']}?"
-                self.next_agent_action_type = 'inform'
+            if prediction != 'no':
+                if self.agent_actions[1]['place'] != '':
+                    self.next_agent_action = f"Do you want me to give you some information about {self.agent_actions[2]['type']}?"
+                    self.next_agent_action_type = 'inform'
             else:
-                # END OF THE DEMO
-                self.next_agent_action = "Bye"
+                self.next_agent_action = "Oh, no problem then. Is there anything else I can help you with?"
+                self.reset()
 
         elif self.next_agent_action_type == 'inform':
-            if self.agent_actions[0]['date'] == '':
-                self.agent_actions[0]['date'] = self.last_input
-                self.next_agent_action = f"{self.gmaps_info['name']} is now {'open!' if self.gmaps_info['opening_hours'] == True else 'closed, sorry. You can visit some other day!'}"
-                self.next_agent_action_type = 'request'
             # Next step, look for the other slot
-            elif self.agent_actions[1]['info'] == '':
-                self.agent_actions[1]['info'] = self.last_input
-                self.next_agent_action = f'Ok so.. {self.wiki_info}'
-                self.next_agent_action_type = 'request'
-            pass
+            if self.agent_actions[1]['place'] == '':
+                options = self.gmaps_info['options']
+
+                if len(options) > 0:
+                    self.next_agent_action = f"I found {len(options)} place{'s' if len(options) > 1 else ''}. The " \
+                                             f"closest one is {options[0]['name']}, located at {options[0]['formatted_address']}"
+                    self.agent_actions[1]['place'] = options[0]['name']
+                    self.agent_actions[2]['type'] = self.last_entity[0]
+                    self.next_agent_action_type = 'request'
+                else:
+                    self.next_agent_action = f"Ok, this is embarrassing. I could not find any places related to what " \
+                                             f"you are looking for. Can you re-phrase it for me? "
+                    self.next_agent_action_type = 'inform'
+
+            # Next step, look for the other slot
+            elif self.agent_actions[0]['info'] == '':
+                if prediction == 'no':
+                    self.next_agent_action = "Oh, no problem then. Is there anything else I can help you with?"
+                    self.reset()
+                else:
+                    self.agent_actions[0]['info'] = self.last_input
+                    self.next_agent_action = f'Ok so.. {self.wiki_info}'
+                    self.next_agent_action_type = 'request'
+                    self.agent_actions[1]['info'] = self.wiki_info
 
     def print_history(self):
-        ''' Print current history
-        '''
+        """ Print current history
+        """
         for text in self.history:
             print(text)
 
+    def conversation_started(self):
+        return self.c_started
+
     def reset(self):
-        ''' Remove conversation
-        '''
+        """ Remove conversation
+        """
         self.history = []
         self.c_started = False
         self.last_input = ''
