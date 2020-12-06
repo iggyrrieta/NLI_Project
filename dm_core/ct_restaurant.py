@@ -104,12 +104,12 @@ class ConversationTracker:
             self.nearby_restaurant = content["restaurants"][0]
 
 
-    def new_utterance(self, text, entity):
+    def new_utterance(self, text, entities, pos_dobj, prediction):
         ''' Receive new text entry
         '''
         self.c_started = True
         self.last_input = text
-        self.last_entity = [i.text for i in entity]
+        self.last_entity = [i.text for i in entities]
 
         # if self.next_agent_action_type == 'request':
         #     self._get_city_id(self.last_entity[0])
@@ -120,7 +120,7 @@ class ConversationTracker:
         # Append to history.
         self.history.append(f"{self._id} - {self.last_input}")
         # Analyze text.
-        self.publish(self.info, entity)
+        self.publish(self.info, entities)
 
     def publish(self, text, ent):
         '''Publish all processed info
@@ -172,10 +172,19 @@ class ConversationTracker:
             pass
 
     def print_history(self):
-        ''' Print current history
-        '''
+        """
+        Prints current history
+        :return: console printed data
+        """
         for text in self.history:
             print(text)
+
+    def conversation_started(self):
+        """
+        Get whether if CT has started or reset
+        :return:
+        """
+        return self.c_started
 
     def reset(self):
         ''' Remove conversation

@@ -51,8 +51,10 @@ interest_nlg = Map()
 
 interest_nlg.request_time = "Sure thing! I need some extra information, when do you want to visit {place}?"
 interest_nlg.request_more_info = "Do you want me to give you some information about {place}?"
+interest_nlg.inform_options = "I found {number_opt} place(s). The closest one is {opt_name}, located at {opt_address}"
 
-interest_nlg.inform_open = "{place} is now open! "
-interest_nlg.inform_closed = "{place} is now is now closed, sorry. You can visit some other day! "
+interest_nlg.negative_response = "Oh, no problem then. Is there anything else I can help you with?"
+interest_nlg.interest_not_found = f"Ok, this is embarrassing. I could not find any places related to what " \
+                                         f"you are looking for. Can you re-phrase it for me? "
 
 interest_nlg.tell_me_more = "Ok so ... {text}"
