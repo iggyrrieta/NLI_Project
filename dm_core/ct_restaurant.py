@@ -21,7 +21,7 @@ class ConversationTracker:
     """Tracking of conversations."""
 
     # Couple of convenience class variables.
-    API_KEY = "AIzaSyAyXm2QHjQ5gB15WDt3Yqd3uAY9NRuy0WU"
+    API_KEY = "AIzaSyC6mOYGvwWOtK1YWowXSSEvbeafIGbVo2E"
     ENDPOINT_URL = "https://maps.googleapis.com/maps/api/place/findplacefromtext"
     FIELDS = "formatted_address,name,opening_hours,rating,opening_hours"
     PATHS = {

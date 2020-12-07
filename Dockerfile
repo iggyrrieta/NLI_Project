@@ -26,4 +26,4 @@ RUN poetry install
 RUN poetry run python -m spacy download en_core_web_lg
 RUN usermod -aG audio,pulse,pulse-access root
 
-CMD exec poetry run python -u test.py 2>&1
+CMD poetry run python -u test.py 2>&1
