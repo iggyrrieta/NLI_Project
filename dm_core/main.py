@@ -132,13 +132,14 @@ class DMCore:
         while (1):
 
             # client_in = self.speechrecognition.get_audio()
-            client_in = input()
+            client_in = input("[in]: ")
             logger.info(f"[CLIENT] {client_in}")
             # We start conversation with client_in input
             self.new_utterance(client_in)
             agent_action = self.conversation_tracker.next_agent_action
 
             if agent_action in ['Bye', 'goodbye', 'exit']:
+                logger.info("Agent action is one of ['Bye', 'goodbye', 'exit']")
                 break
             else:
                 # self.speechrecognition.assistant_voice(agent_action)
@@ -188,13 +189,12 @@ class DMCore:
         self.new_utterance(user_response)
 
     def chat(self):
-
         while (1):
-
             agent_action = self.next_agent_action
             self.agent_response(agent_action)
 
             if agent_action in ['goodbye', 'exit']:
+                logger.info("Exiting (DMCore.chat)")
                 break
             else:
                 pass

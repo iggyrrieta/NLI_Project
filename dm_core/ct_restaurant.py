@@ -76,22 +76,27 @@ class ConversationTracker:
                 baseurl=ConversationTracker.ENDPOINT_URL,
                 place_name=place_name)
 
+            logger.info("Fetching city_id.")
             r = requests.get(url, headers=ConversationTracker.REQUEST_HEADER)
+            logger.info("Fetched city_id.")
             content = r.json()
             content = content["location_suggestions"][0]
 
             try:
                 self.city_id = content["city_id"]
                 self.place = content["title"]
+                logger.info(f"Got {self.place}({self.city_id}) on query {place_name}.")
             except Exception as e:
-                print("An error occurred trying to fetch city_id.", e)
+                logger.error("An error occurred trying to fetch city_id.", e)
 
         if self.city_id is not None:
             url = ConversationTracker.PATHS["cuisines"].substitute(
                 baseurl=ConversationTracker.ENDPOINT_URL,
                 city_id=self.city_id)
 
+            logger.info("Fetching available cuisines.")
             r = requests.get(url, headers=ConversationTracker.REQUEST_HEADER)
+            logger.info("Fetched available cuisines.")
             content = r.json()
             content = content["cuisines"]
             content = random.sample(content, min(10, len(content)))
@@ -103,14 +108,16 @@ class ConversationTracker:
         ''' Call Zomato API to get resturants nearby with chosen cuisine.
         '''
         if self.city_id is None:
-            print("Error `city_id` not set.")
+            logger.error("Error `city_id` not set.")
         else:
             url = ConversationTracker.PATHS["search"].substitute(
                 baseurl=ConversationTracker.ENDPOINT_URL,
                 city_id=self.city_id,
                 cuisine=cuisine)
 
+            logger.info("Fetching nearby restaurants.")
             r = requests.get(url, headers=ConversationTracker.REQUEST_HEADER)
+            logger.info("Fetched nearby restaurants.")
             content = r.json()
 
             self.nearby_restaurant = content["restaurants"][0]
@@ -141,6 +148,7 @@ class ConversationTracker:
 
         # slot not detected
         if self.next_agent_action_type == 'request':
+            logger.info("Slots not detected, requesting information.")
             if self.agent_actions[0]['location'] == '':
                 self.next_agent_action = restaurant_nlg.request_location
                 self.next_agent_action_type = 'inform'
@@ -153,6 +161,7 @@ class ConversationTracker:
                 self.next_agent_action = "Bye"
 
         elif self.next_agent_action_type == 'inform':
+            logger.info("Slots detected.")
             if self.agent_actions[0]['location'] == '':
                 self.agent_actions[0]['location'] = self.last_input
 
@@ -168,9 +177,11 @@ class ConversationTracker:
                 self.agent_actions[1]['cuisine'] = self.last_input
 
                 if self.last_input.lower() not in self.available_cuisines.keys():
+                    logger.info(f"Cuisine {self.last_input.lower()} not in {', '.join(self.available_cuisines.keys())}")
                     self.next_agent_action = restaurant_nlg.unavailable_cuisine
                     self.next_agent_action_type = "inform"
                 else:
+                    logger.info("Finding nearby restaurants.")
                     self._get_nearby_restaurants(self.available_cuisines[self.last_input.lower()])
                     name = self.nearby_restaurant["restaurant"]["name"]
                     place = self.nearby_restaurant["restaurant"]["location"]["address"]
@@ -181,7 +192,6 @@ class ConversationTracker:
                                                 place=place,
                                                 timings=timings)
                     self.next_agent_action_type = 'request'
-            pass
 
     def get_history(self):
         """
