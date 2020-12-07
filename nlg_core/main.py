@@ -41,7 +41,7 @@ restaurant_nlg.request_location = "Okay, what location do you want me to search 
 restaurant_nlg.request_cuisine = "What cuisine do you want to try?"
 
 restaurant_nlg.inform_place = "Okay great, so I shall look for restaurants around {place}. "
-restaurant_nlg.inform_restaurant = "You may visit {name}, it is located at {place}. The timings are {timings}."
+restaurant_nlg.inform_restaurant = "You may visit {name}, it is located at {place}. It is now {open}."
 
 restaurant_nlg.unavailable_cuisine = "Please select one of the available cuisines!"
 
