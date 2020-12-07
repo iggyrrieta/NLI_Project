@@ -22,11 +22,8 @@ pulseaudio-utils \
 COPY poetry.lock .
 COPY pyproject.toml .
 RUN pip install poetry
-RUN poetry remove pyobjc
 RUN poetry install
 RUN poetry run python -m spacy download en_core_web_lg
 RUN usermod -aG audio,pulse,pulse-access root
-
-COPY . .
 
 CMD ["poetry", "run", "python", "app.py"]
