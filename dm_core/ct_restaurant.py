@@ -23,7 +23,7 @@ class ConversationTracker:
     # Couple of convenience class variables.
     API_KEY = "AIzaSyC6mOYGvwWOtK1YWowXSSEvbeafIGbVo2E"
     ENDPOINT_URL = "https://maps.googleapis.com/maps/api/place/findplacefromtext"
-    FIELDS = "formatted_address,name,opening_hours,rating,opening_hours"
+    FIELDS = "formatted_address,name,opening_hours,rating"
     PATHS = {
         "search" : Template(f"$baseurl/json?input=$input&key={API_KEY}&language=en&fields={FIELDS}&inputtype=textquery")
     }
