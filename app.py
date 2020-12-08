@@ -1,6 +1,10 @@
 from flask import Flask, render_template, request # Web app
 from datetime import datetime # to create folder with date
 
+import warnings
+from sklearn.exceptions import DataConversionWarning
+warnings.filterwarnings(action='ignore', category=DataConversionWarning)
+
 import sys
 import os
 import logging
@@ -53,4 +57,3 @@ def flow():
 #############################################
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-
