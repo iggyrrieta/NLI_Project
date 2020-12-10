@@ -35,6 +35,44 @@ class Map(dict):
         del self.__dict__[key]
 
 
+#############################
+#     DIALOGUE MANAGER
+#############################
+dm_nlg = Map()
+
+# IDEA: This random thing can also be a dictionay with level of happiness 
+# detected using sentiment analysis. We probably don't have time but we can
+# say this on the presentation
+
+# intent = greet
+dm_nlg.greet_client  = ['Hello!, How can I help you?',
+             'Hey there!, I am here to help you. What are you looking for?',
+             'Today is a perfect day to discover new places, what you have in mind?']
+
+# intent = goodbye
+dm_nlg.gbye_client  = ['Bye :(, come back soon!',
+        'Chao! Have a nice day!',
+        'Adieu! ;)',
+        'Auf Wiedersehen']
+
+# intent = no
+dm_nlg.intent_type_no = ['Ok, have a nice day, bye!',
+                  'Oh, what a pity, good bye!',
+                  ':( okay, no problem Have fun!']
+
+# intent = yes
+dm_nlg.intent_type_yes = ['Good!, How can I help you?',
+                  'Yeah! I am here to help, where do you want to go?',
+                  'Sure, how can I help you?']
+
+# intent = missing
+dm_nlg.intent_missing  = ['404! can you repeat please...sorry. Dont get what you mean when you say "{missing}"',
+           'mmm... I dont get what you mean by "{missing}"',
+           '"{missing}"?, what you mean?']
+
+#############################
+#     RESTAURANT CT
+#############################
 restaurant_nlg = Map()
 
 restaurant_nlg.request_location = "Okay, what location do you want me to search a restaurant in?"
@@ -45,7 +83,9 @@ restaurant_nlg.inform_restaurant = "You may visit {name}, it is located at {plac
 
 restaurant_nlg.unavailable_cuisine = "Please select one of the available cuisines!"
 
-
+#############################
+#     INTEREST CT
+#############################
 interest_nlg = Map()
 
 interest_nlg.request_time = "Sure thing! I need some extra information, when do you want to visit {place}?"

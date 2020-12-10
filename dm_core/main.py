@@ -2,6 +2,7 @@ import os
 import sys
 import pandas as pd
 import logging.config
+import random
 
 # ROOT FOLDER : Make things easier setting the root folder as the origin
 #root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
@@ -11,6 +12,7 @@ import logging.config
 from sp_recognition.main import SPCore
 # NLU
 from nlu_core.main import NLUCore
+from nlg_core.main import dm_nlg
 # Conversation trackers
 from dm_core.ct_interest import ConversationTracker as ct_interest
 from dm_core.ct_restaurant import ConversationTracker as ct_restaurant
@@ -53,7 +55,7 @@ class DMCore:
 
         # Read db file
         data = pd.read_csv(self.db_path, delimiter=',')
-        self.agent_intents = ['greet', 'goodbye', 'restaurant_search', 'interest_search', 'yes', 'no']
+        self.agent_intents = set(data.intent)
 
     def __repr__(self):
         return '\n'.join([
@@ -98,11 +100,11 @@ class DMCore:
             # Move to the specific conversation tracker detected per intent
             if self.predicted == 'greet':
                 self.conversation_tracker = None
-                self.next_agent_action = 'Hi there!'
+                self.next_agent_action = random.choice(dm_nlg.greet_client).format()
 
             if self.predicted == 'goodbye':
                 self.conversation_tracker = None
-                self.next_agent_action = 'Bye :(, come back soon!'
+                self.next_agent_action = random.choice(dm_nlg.gbye_client).format()
 
             if self.predicted == 'restaurant_search':
                 # Prior doing the search itself, we should complete all the slots needed
@@ -115,8 +117,34 @@ class DMCore:
                 # i.e., interest_search needs interest and location slots to perform the search properly
                 self.conversation_tracker = ct_interest()
                 self.conversation_tracker.start()
+
+            # This is the "yes-no" case (which are agent_intents but a common answer too)
+            # we probably reach this point after a CT reset (i.e saying no or yes to "any other help?")
+            if self.predicted == 'no':
+                # It means we are here from a reset in CT. I am not setting TC to None, 
+                # we are going to exit at this point anyway
+                if self.conversation_tracker is not None:
+                    self.conversation_tracker = None
+                    self.next_agent_action = random.choice(dm_nlg.intent_type_no).format()
+                else:
+                    self.conversation_tracker = None
+                    # Nonesense no prediction
+                    self.next_agent_action = random.choice(dm_nlg.intent_missing).format(missing=self.user_utterance)
+
+            if self.predicted == 'yes':
+                if self.conversation_tracker is not None:
+                    self.conversation_tracker = None
+                    self.next_agent_action = random.choice(dm_nlg.intent_type_yes).format()
+                else:
+                    self.conversation_tracker = None
+                    # Nonesense yes prediction
+                    self.next_agent_action = random.choice(dm_nlg.intent_missing).format(missing=self.user_utterance)
+
         else:
             self.conversation_tracker = None
+            # Nonesense prediction
+            self.next_agent_action = random.choice(dm_nlg.intent_missing).format(missing=self.user_utterance)
+            
 
     def start(self, path=None):
         '''Subscribtion to topic self.conversation_tracker
@@ -136,18 +164,24 @@ class DMCore:
             logger.info(f"[CLIENT] {client_in}")
             # We start conversation with client_in input
             self.new_utterance(client_in)
-            agent_action = self.conversation_tracker.next_agent_action
+            # Special cases (goodbye, greet, no, yes, missing)
 
-            if agent_action in ['Bye', 'goodbye', 'exit']:
-                logger.info("Agent action is one of ['Bye', 'goodbye', 'exit']")
-                break
-            else:
-                # self.speechrecognition.assistant_voice(agent_action)
-                #print(self.conversation_tracker)
+            if self.conversation_tracker is None:
+                # Calling this just to refresh the random messages
+                #self._set_conversation_tracker()
+                agent_action = self.next_agent_action
+                if self.predicted in ['goodbye', 'no']:
+                    logger.info(f"[AGENT] {agent_action}")
+                    # self.speechrecognition.assistant_voice(agent_action)
+                    break
                 logger.info(f"[AGENT] {agent_action}")
+                # self.speechrecognition.assistant_voice(agent_action)    
+            else:
+            
+                agent_action = self.conversation_tracker.next_agent_action
+                logger.info(f"[AGENT] {agent_action}")
+                # self.speechrecognition.assistant_voice(agent_action)
 
-        # self.speechrecognition.assistant_voice("Bye")
-        logger.info(f"[AGENT] Bye")
         logger.info("---------------------------------------------")
 
     def new_utterance(self, client_in):
@@ -183,6 +217,8 @@ class DMCore:
                 self.conversation_started = True
                 self.conversation_tracker.new_utterance(client_in, self.detected_entities, self.detected_pos_dobj,
                                                         self.predicted)
+            else:
+                self.conversation_started = False
 
     def agent_response(self, output):
         user_response = input(output)
