@@ -115,8 +115,8 @@ class ConversationTracker:
                 self.next_agent_action = restaurant_nlg.request_cuisine
                 self.next_agent_action_type = 'inform'
             else:
-                # END OF THE DEMO
-                self.next_agent_action = "Bye"
+                self.next_agent_action = restaurant_nlg.finish.format()
+                self.reset()
 
         elif self.next_agent_action_type == 'inform':
             logger.info("Slots detected.")

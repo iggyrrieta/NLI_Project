@@ -51,23 +51,18 @@ dm_nlg.greet_client  = ['Hello!, How can I help you?',
 
 # intent = goodbye
 dm_nlg.gbye_client  = ['Bye :(, come back soon!',
-        'Chao! Have a nice day!',
+        'Ciao! Have a nice day!',
         'Adieu! ;)',
         'Auf Wiedersehen']
 
-# intent = no
-dm_nlg.intent_type_no = ['Ok, have a nice day, bye!',
-                  'Oh, what a pity, good bye!',
-                  ':( okay, no problem Have fun!']
-
-# intent = yes
-dm_nlg.intent_type_yes = ['Good!, How can I help you?',
-                  'Yeah! I am here to help, where do you want to go?',
-                  'Sure, how can I help you?']
+# intent = yes|no when there is not CT active
+dm_nlg.general_fallback = ['Would you like me to help you with something? I can tell you places to have fun or where to visit and eat'
+                  "Hey! Let's start over :) can I help you with something?",
+                  'So, would you like to know something else?']
 
 # intent = missing
-dm_nlg.intent_missing  = ['404! can you repeat please...sorry. Dont get what you mean when you say "{missing}"',
-           'mmm... I dont get what you mean by "{missing}"',
+dm_nlg.intent_missing  = ["404! can you repeat please...sorry. Did not get what you mean when you say '{missing}'",
+           'mmm... I did not get what you mean by "{missing}"',
            '"{missing}"?, what you mean?']
 
 #############################
@@ -81,7 +76,8 @@ restaurant_nlg.request_cuisine = "What cuisine do you want to try?"
 restaurant_nlg.inform_place = "Okay great, so I shall look for restaurants around {place}. "
 restaurant_nlg.inform_restaurant = "You may visit {name}, it is located at {place}. It is now {open}."
 
-restaurant_nlg.unavailable_cuisine = "Please select one of the available cuisines!"
+restaurant_nlg.unavailable_cuisine = "Please, select one of the available cuisines :)"
+restaurant_nlg.finish = "Is there anything else I can help you with?"
 
 #############################
 #     INTEREST CT

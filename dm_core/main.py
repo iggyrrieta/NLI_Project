@@ -125,24 +125,24 @@ class DMCore:
                 # we are going to exit at this point anyway
                 if self.conversation_tracker is not None:
                     self.conversation_tracker = None
-                    self.next_agent_action = random.choice(dm_nlg.intent_type_no).format()
+                    self.next_agent_action = random.choice(dm_nlg.general_fallback).format()
                 else:
                     self.conversation_tracker = None
-                    # Nonesense no prediction
+                    # Nonsenses no prediction
                     self.next_agent_action = random.choice(dm_nlg.intent_missing).format(missing=self.user_utterance)
 
             if self.predicted == 'yes':
                 if self.conversation_tracker is not None:
                     self.conversation_tracker = None
-                    self.next_agent_action = random.choice(dm_nlg.intent_type_yes).format()
+                    self.next_agent_action = random.choice(dm_nlg.general_fallback).format()
                 else:
                     self.conversation_tracker = None
-                    # Nonesense yes prediction
+                    # Nonsenses yes prediction
                     self.next_agent_action = random.choice(dm_nlg.intent_missing).format(missing=self.user_utterance)
 
         else:
             self.conversation_tracker = None
-            # Nonesense prediction
+            # Nonsenses prediction
             self.next_agent_action = random.choice(dm_nlg.intent_missing).format(missing=self.user_utterance)
             
 
@@ -177,7 +177,6 @@ class DMCore:
                 logger.info(f"[AGENT] {agent_action}")
                 # self.speechrecognition.assistant_voice(agent_action)    
             else:
-            
                 agent_action = self.conversation_tracker.next_agent_action
                 logger.info(f"[AGENT] {agent_action}")
                 # self.speechrecognition.assistant_voice(agent_action)
