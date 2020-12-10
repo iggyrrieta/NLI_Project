@@ -166,7 +166,6 @@ class ConversationTracker:
         Reset conversation
         :return:
         """
-        self.history = []
         self.c_started = False
         self.last_input = ''
         self.last_entity = ''

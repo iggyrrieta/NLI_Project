@@ -34,6 +34,7 @@ class SPCore:
             elif sys.platform.startswith('linux'):
                 subprocess.check_output(["espeak", f"{output}"])
             else:
+                print("unsupported platform!")
                 sys.exit(-1)
 
         except Exception as e:

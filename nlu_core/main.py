@@ -82,7 +82,7 @@ class NLUCore:
         pos_tags_or_dobj = []
         for token in doc:
             #print(token.pos_, token.dep_)
-            if token.pos_ == 'ADJ' or token.dep_ == 'dobj':
+            if token.pos_ == 'ADJ' or token.dep_ == 'dobj' or token.pos_ == 'NOUN':
                 pos_tags_or_dobj.append(token.text)
 
         self.extracted_entities = doc.ents
