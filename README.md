@@ -1,6 +1,24 @@
 # TOURIST GUIDE ASSISTANT
 
-This repository is for **coding** and **tasks/issue** management, all related documentation can be found on [Gdrive](https://drive.google.com/drive/folders/1wCaHrKBYQHtLAskHnPmnO29eFlAjSK-1?usp=sharing).
+
+
+
+
+
+
+[...HERE A NICE AND COOL DESCRIPTION WITH GRAPHS ETC...]
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Requirements
 
@@ -10,3 +28,15 @@ This repository is for **coding** and **tasks/issue** management, all related do
 ## Usage
 
 Install `pulseaudio`. Then execute the `run.sh` script (needs Docker).
+
+Local quick test, just launch `test.py`
+
+
+
+## Authors
+
+Natalia Pattarone
+
+Sayan Goswami
+
+Iñaki Lorente
