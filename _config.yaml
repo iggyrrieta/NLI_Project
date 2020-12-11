@@ -1,0 +1,21 @@
+name: github pages
+
+on:
+  push:
+    branches:
+      - doxygen-doc  # Set a branch name to trigger deployment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Deploy 
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }} # GitHub Actions runner automatically creates a GITHUB_TOKEN secret to use in your workflow.
+
+      - name: Documentation
+        uses: mattnotmitt/doxygen-action@v1
+        with:
+          doxyfile-path: './Doxyfile'
+          enable-latex: true
