@@ -86,48 +86,26 @@ class ConversationTracker:
         self.last_input = text
         self.last_entity = [i.text for i in entities]
 
-        logger.info(f"Entities: {self.last_entity}")
-
-        popular_cuisines = list(map(lambda x: x.lower(), [
-            "Ainu", "Albanian", "Argentine", "Andhra", "American", "Anglo-Indian", "Arab", "Armenian", "Assyrian",
-            "Awadhi", "Azerbaijani", "Balochi", "Belarusian", "Bangladeshi", "Bengali", "Berber", "Brazilian",
-            "British", "Buddhist", "Bulgarian", "Cajun", "Cantonese", "Caribbean", "Chechen", "Chinese",
-            "Chinese Islamic", "Circassian", "Crimean Tatar", "Cypriot", "Czech", "Danish", "Egyptian", "English",
-            "Ethiopian", "Eritrean", "Estonian", "French", "Filipino", "Georgian", "German", "Goan", "Goan Catholic",
-            "Greek", "Gujarati", "Hyderabad", "Indian", "Indian Chinese", "Indian Singaporean",
-            "Indonesian", "Inuit", "Irish", "Italian-American", "Italian", "Jamaican", "Japanese", "Jewish",
-            "Karnataka", "Kazakh", "Keralite", "Korean", "Kurdish", "Laotian", "Lebanese", "Latvian", "Lithuanian",
-            "Louisiana Creole", "Maharashtrian", "Mangalorean", "Malay", "Malaysian Chinese",
-            "Malaysian Indian", "Mediterranean", "Mennonite", "Mexican", "Mordovian", "Mughal",
-            "Native American", "Nepalese", "New Mexican", "Odia", "Parsi", "Pashtun", "Polish", "Pennsylvania Dutch",
-            "Pakistani", "Peranakan", "Persian", "Peruvian", "Portuguese", "Punjabi", "Québécois", "Rajasthani",
-            "Romanian", "Russian", "Sami", "Serbian", "Sindhi", "Slovak", "Slovenian", "Somali", "South Indian",
-            "Soviet", "Spanish", "Sri Lankan", "Taiwanese", "Tatar", "Texan", "Thai", "Turkish", "Tamil", "Udupi",
-            "Ukrainian", "Vietnamese", "Yamal", "Zambian", "Zanzibari"]))
-
         # Fill cuisine slot
-        t_ent = self.last_entity
+        t_ent = entities
         found_cuisine = False
         found_location = False
 
-        for i, e in enumerate(t_ent):
-            if e.lower() in popular_cuisines:
-                self.agent_actions[1]['cuisine'] = e.lower()
-                t_ent.pop(i)
+        for e in t_ent:
+            logger.info(f"Entity {e.text} has label {e.label_}")
+            if e.label_ == 'GPE' or e.label_ == 'LOC':
+                self.agent_actions[0]['location'] = e.text
+                found_location = True
+
+            if e.label_ == 'PRODUCT' or e.label_ == 'NORP':
+                self.agent_actions[1]['cuisine'] = e.text.lower()
                 found_cuisine = True
 
-            if found_cuisine:
+            if found_location and found_cuisine:
+                self.next_agent_action_type = 'inform'
                 break
 
-        if len(t_ent) > 0:
-            self.agent_actions[0]['location'] = t_ent[0]
-            found_location = True
-
-        if found_location and found_cuisine:
-            self.next_agent_action_type = 'inform'
-
         logger.info(f"Slots: {self.agent_actions}")
-
 
         # Increment utterance id.
         self._id += 1
@@ -141,74 +119,58 @@ class ConversationTracker:
            to be used by dm subscribe
         '''
 
-        # slot not detected
+        # Slots not detected
         if self.next_agent_action_type == 'request':
             logger.info("Slots not detected, requesting information.")
+
+            # Check for location.
             if self.agent_actions[0]['location'] == '':
                 self.next_agent_action = restaurant_nlg.request_location
-                self.next_agent_action_type = 'inform'
-            # Next step, look for the other slot
+
+                # See if cuisine is missing.
+                if self.agent_actions[1]['cuisine'] == '':
+                    self.next_agent_action_type = 'request'
+                else:
+                    self.next_agent_action_type = 'inform'
+
+            # Check for cusine.
             elif self.agent_actions[1]['cuisine'] == '':
                 self.next_agent_action = restaurant_nlg.request_cuisine
-                self.next_agent_action_type = 'inform'
+
+                # See if location is missing.
+                if self.agent_actions[0]['location'] == '':
+                    self.next_agent_action_type = 'request'
+                else:
+                    self.next_agent_action_type = 'inform'
+
+            # Abort mission!
             else:
-                self.next_agent_action = restaurant_nlg.finish.format()
+                self.next_agent_action = restaurant_nlg.finish
                 self.reset()
 
         elif self.next_agent_action_type == 'inform':
-            logger.info("Slots detected.")
+            logger.info("All slots detected.")
 
-            if self.agent_actions[0]['location'] == '':
-                self.agent_actions[0]['location'] = self.last_entity[0]
-                self.place = self.agent_actions[0]['location']
+            self.place = self.agent_actions[0]['location']
+            self.cuisine = self.agent_actions[1]['cuisine']
 
-                self.next_agent_action = restaurant_nlg.inform_place.format(place=self.place)
-                self.next_agent_action += restaurant_nlg.request_cuisine
-                self.next_agent_action_type = 'inform'
-            # Next step, look for the other slot
-            elif self.agent_actions[1]['cuisine'] == '':
-                self.agent_actions[1]['cuisine'] = self.last_entity[0]
-                self.cuisine = self.agent_actions[1]['cuisine']
+            query = f"{self.cuisine} restaurants near {self.place}"
+            logger.info(f"Finding nearby restaurants. Search term: {query}")
+            self._get_nearby_restaurants(query)
 
-                query = f"{self.cuisine} restaurants near {self.place}"
-                logger.info(f"Finding nearby restaurants. Search term: {query}")
-                self._get_nearby_restaurants(query)
+            name = self.nearby_restaurant["name"]
+            place = self.nearby_restaurant["formatted_address"]
 
-                name = self.nearby_restaurant["name"]
-                place = self.nearby_restaurant["formatted_address"]
-
-                if self.nearby_restaurant["opening_hours"]["open_now"]:
-                    open = "open"
-                else:
-                    open = "closed"
-
-                self.next_agent_action = restaurant_nlg.inform_restaurant.format(
-                                            name=name,
-                                            place=place,
-                                            open=open)
-                self.next_agent_action_type = 'request'
-            # All slots present, proceed with query.
+            if self.nearby_restaurant["opening_hours"]["open_now"]:
+                open = "open"
             else:
-                self.place = self.agent_actions[0]['location']
-                self.cuisine = self.agent_actions[1]['cuisine']
+                open = "closed"
 
-                query = f"{self.cuisine} restaurants near {self.place}"
-                logger.info(f"Finding nearby restaurants. Search term: {query}")
-                self._get_nearby_restaurants(query)
-
-                name = self.nearby_restaurant["name"]
-                place = self.nearby_restaurant["formatted_address"]
-
-                if self.nearby_restaurant["opening_hours"]["open_now"]:
-                    open = "open"
-                else:
-                    open = "closed"
-
-                self.next_agent_action = restaurant_nlg.inform_restaurant.format(
-                                            name=name,
-                                            place=place,
-                                            open=open)
-                self.next_agent_action_type = 'request'
+            self.next_agent_action = restaurant_nlg.inform_restaurant.format(
+                                        name=name,
+                                        place=place,
+                                        open=open)
+            self.next_agent_action_type = 'request'
 
     def get_history(self):
         """
@@ -231,3 +193,6 @@ class ConversationTracker:
         self.history = []
         self.c_started = False
         self.last_input = ''
+
+        for slot in self.agent_request:
+            self.agent_actions.append({slot: ''})
