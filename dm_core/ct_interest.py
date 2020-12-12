@@ -144,7 +144,7 @@ class ConversationTracker:
                     self.agent_actions[0]['info'] = self.last_input
                     self.next_agent_action = interest_nlg.tell_me_more.format(text=self.wiki_info)
                     self.next_agent_action_type = 'request'
-                    self.agent_actions[1]['info'] = self.wiki_info
+                    self.agent_actions[0]['info'] = self.wiki_info
 
     def get_history(self):
         """
