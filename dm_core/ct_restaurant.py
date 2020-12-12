@@ -86,9 +86,26 @@ class ConversationTracker:
         self.last_input = text
         self.last_entity = [i.text for i in entities]
 
-        # if self.next_agent_action_type == 'request':
-        #     self._get_city_id(self.last_entity[0])
-        #     self._get_nearby_resturants(self.last_entity[0])
+        # Fill cuisine slot
+        t_ent = entities
+        found_cuisine = False
+        found_location = False
+
+        for e in t_ent:
+            logger.info(f"Entity {e.text} has label {e.label_}")
+            if e.label_ == 'GPE' or e.label_ == 'LOC':
+                self.agent_actions[0]['location'] = e.text
+                found_location = True
+
+            if e.label_ == 'PRODUCT' or e.label_ == 'NORP':
+                self.agent_actions[1]['cuisine'] = e.text.lower()
+                found_cuisine = True
+
+            if found_location and found_cuisine:
+                self.next_agent_action_type = 'inform'
+                break
+
+        logger.info(f"Slots: {self.agent_actions}")
 
         # Increment utterance id.
         self._id += 1
@@ -102,53 +119,58 @@ class ConversationTracker:
            to be used by dm subscribe
         '''
 
-        logger.info(f"Entities: {self.last_entity}")
-
-        # slot not detected
+        # Slots not detected
         if self.next_agent_action_type == 'request':
             logger.info("Slots not detected, requesting information.")
+
+            # Check for location.
             if self.agent_actions[0]['location'] == '':
                 self.next_agent_action = restaurant_nlg.request_location
-                self.next_agent_action_type = 'inform'
-            # Next step, look for the other slot
+
+                # See if cuisine is missing.
+                if self.agent_actions[1]['cuisine'] == '':
+                    self.next_agent_action_type = 'request'
+                else:
+                    self.next_agent_action_type = 'inform'
+
+            # Check for cusine.
             elif self.agent_actions[1]['cuisine'] == '':
                 self.next_agent_action = restaurant_nlg.request_cuisine
-                self.next_agent_action_type = 'inform'
+
+                # See if location is missing.
+                if self.agent_actions[0]['location'] == '':
+                    self.next_agent_action_type = 'request'
+                else:
+                    self.next_agent_action_type = 'inform'
+
+            # Abort mission!
             else:
-                self.next_agent_action = restaurant_nlg.finish.format()
+                self.next_agent_action = restaurant_nlg.finish
                 self.reset()
 
         elif self.next_agent_action_type == 'inform':
-            logger.info("Slots detected.")
+            logger.info("All slots detected.")
 
-            if self.agent_actions[0]['location'] == '':
-                self.agent_actions[0]['location'] = self.last_entity[0]
-                self.place = self.last_entity[0]
-                self.next_agent_action = restaurant_nlg.inform_place.format(place=self.place)
-                self.next_agent_action += restaurant_nlg.request_cuisine
-                self.next_agent_action_type = 'inform'
-            # Next step, look for the other slot
-            elif self.agent_actions[1]['cuisine'] == '':
-                self.agent_actions[1]['cuisine'] = self.last_entity[0]
-                self.cuisine = self.last_entity[0]
+            self.place = self.agent_actions[0]['location']
+            self.cuisine = self.agent_actions[1]['cuisine']
 
-                query = f"{self.cuisine} restaurants near {self.place}"
-                logger.info(f"Finding nearby restaurants. Search term: {query}")
-                self._get_nearby_restaurants(query)
+            query = f"{self.cuisine} restaurants near {self.place}"
+            logger.info(f"Finding nearby restaurants. Search term: {query}")
+            self._get_nearby_restaurants(query)
 
-                name = self.nearby_restaurant["name"]
-                place = self.nearby_restaurant["formatted_address"]
+            name = self.nearby_restaurant["name"]
+            place = self.nearby_restaurant["formatted_address"]
 
-                if self.nearby_restaurant["opening_hours"]["open_now"]:
-                    open = "open"
-                else:
-                    open = "closed"
+            if self.nearby_restaurant["opening_hours"]["open_now"]:
+                open = "open"
+            else:
+                open = "closed"
 
-                self.next_agent_action = restaurant_nlg.inform_restaurant.format(
-                                            name=name,
-                                            place=place,
-                                            open=open)
-                self.next_agent_action_type = 'request'
+            self.next_agent_action = restaurant_nlg.inform_restaurant.format(
+                                        name=name,
+                                        place=place,
+                                        open=open)
+            self.next_agent_action_type = 'request'
 
     def get_history(self):
         """
@@ -171,3 +193,6 @@ class ConversationTracker:
         self.history = []
         self.c_started = False
         self.last_input = ''
+
+        for slot in self.agent_request:
+            self.agent_actions.append({slot: ''})
