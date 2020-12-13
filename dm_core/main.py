@@ -147,16 +147,16 @@ class DMCore:
            Get the current info from that topic
         '''
         # Instiantiate Speech recognition
-        # self.speechrecognition = SPCore(path)
+        self.speechrecognition = SPCore(path)
         # First talk: INTRO
-        # self.speechrecognition.assistant_voice("Hello, I am a Tourist Guide Assistant. How can I help you?")
+        self.speechrecognition.assistant_voice("Hello, I am a Tourist Guide Assistant. How can I help you?")
         logger.info("----------NEW CONEVERSATION STARTED----------")
         logger.info("[AGENT] Hello, I am a Tourist Guide Assistant. How can I help you?")
 
         while (1):
 
-            # client_in = self.speechrecognition.get_audio()
-            client_in = input("[in]: ")
+            client_in = self.speechrecognition.get_audio()
+            #client_in = input("[in]: ")
             logger.info(f"[CLIENT] {client_in}")
             # We start conversation with client_in input
             self.new_utterance(client_in)
@@ -168,14 +168,14 @@ class DMCore:
                 agent_action = self.next_agent_action
                 if self.predicted in ['goodbye', 'no']:
                     logger.info(f"[AGENT] {agent_action}")
-                    # self.speechrecognition.assistant_voice(agent_action)
+                    self.speechrecognition.assistant_voice(agent_action)
                     break
                 logger.info(f"[AGENT] {agent_action}")
-                # self.speechrecognition.assistant_voice(agent_action)    
+                self.speechrecognition.assistant_voice(agent_action)
             else:
                 agent_action = self.conversation_tracker.next_agent_action
                 logger.info(f"[AGENT] {agent_action}")
-                # self.speechrecognition.assistant_voice(agent_action)
+                self.speechrecognition.assistant_voice(agent_action)
 
         logger.info("---------------------------------------------")
 
