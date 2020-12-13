@@ -120,19 +120,13 @@ class DMCore:
                 self.conversation_tracker = ct_interest()
                 self.conversation_tracker.start()
 
-                # This is the "yes-no" case (which are agent_intents but a common answer too)
-                # we probably reach this point after a CT reset (i.e saying no or yes to "any other help?")
-                # if self.predicted == 'no' or self.predicted == 'yes':
-                #    # It means we are here from a reset in CT. I am not setting TC to None,
-                #    # we are going to exit at this point anyway
-                #    if self.conversation_tracker is not None:
-                #        self.conversation_tracker = None
-                #        self.next_agent_action = random.choice(dm_nlg.general_fallback).format()
-                #    else:
-                #        # Nonsenses no prediction
-                #        self.next_agent_action = random.choice(dm_nlg.intent_missing).format(missing=self.user_utterance)
+            if self.predicted == 'yes':
+                if self.conversation_tracker is not None:
+                    if not self.conversation_tracker.conversation_started():
+                        self.conversation_tracker = None
+                        self.next_agent_action = random.choice(dm_nlg.general_fallback).format()
 
-            if self.predicted == 'yes' or self.predicted == 'no':
+            if self.predicted == 'no':
                 if self.conversation_tracker is not None:
                     if not self.conversation_tracker.conversation_started():
                         self.next_agent_action = random.choice(dm_nlg.gbye_client).format()
