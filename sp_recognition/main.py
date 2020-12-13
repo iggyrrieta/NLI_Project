@@ -30,7 +30,7 @@ class SPCore:
             # return {file}
 
             if sys.platform.startswith('darwin'):
-                subprocess.check_output(["say", f"{output}"])
+                subprocess.check_output(["/usr/bin/say", "-r 190", "--voice=Samantha",  f"{output}"])
             elif sys.platform.startswith('linux'):
                 subprocess.check_output(["espeak", f"{output}"])
             else:
