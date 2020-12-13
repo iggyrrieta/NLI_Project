@@ -56,8 +56,8 @@ dm_nlg.gbye_client  = ['Bye :(, come back soon!',
         'Auf Wiedersehen']
 
 # intent = yes|no when there is not CT active
-dm_nlg.general_fallback = ['Would you like me to help you with something? I can tell you places to have fun or where to visit and eat'
-                  "Hey! Let's start over :) can I help you with something?",
+dm_nlg.general_fallback = ['Ok, I can tell you places to have fun or where to visit and eat',
+                  "Cool! Let's start over :) tell what you would like to do?",
                   'So, would you like to know something else?']
 
 # intent = missing

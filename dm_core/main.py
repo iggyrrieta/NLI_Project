@@ -5,8 +5,8 @@ import logging.config
 import random
 
 # ROOT FOLDER : Make things easier setting the root folder as the origin
-#root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
-#sys.path.insert(0, root_path)
+# root_path = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+# sys.path.insert(0, root_path)
 
 # SP
 from sp_recognition.main import SPCore
@@ -17,15 +17,17 @@ from nlg_core.main import dm_nlg
 from dm_core.ct_interest import ConversationTracker as ct_interest
 from dm_core.ct_restaurant import ConversationTracker as ct_restaurant
 
-#==============================================================================
+# ==============================================================================
 #   LOGGER
 #
 # This is the main logger
-#==============================================================================
-root_folder = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
+# ==============================================================================
+root_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 logging.config.fileConfig(f"{root_folder}/data/log.ini")
 logger = logging.getLogger('main_logger')
-#==============================================================================
+
+
+# ==============================================================================
 
 class DMCore:
     """Agent that interacts with the user.
@@ -118,25 +120,20 @@ class DMCore:
                 self.conversation_tracker = ct_interest()
                 self.conversation_tracker.start()
 
-            # This is the "yes-no" case (which are agent_intents but a common answer too)
-            # we probably reach this point after a CT reset (i.e saying no or yes to "any other help?")
-            if self.predicted == 'no':
-                # It means we are here from a reset in CT. I am not setting TC to None, 
-                # we are going to exit at this point anyway
-                if self.conversation_tracker is not None:
-                    self.conversation_tracker = None
-                    self.next_agent_action = random.choice(dm_nlg.general_fallback).format()
-                else:
-                    self.conversation_tracker = None
-                    # Nonsenses no prediction
-                    self.next_agent_action = random.choice(dm_nlg.intent_missing).format(missing=self.user_utterance)
-
             if self.predicted == 'yes':
                 if self.conversation_tracker is not None:
+                    if not self.conversation_tracker.conversation_started():
+                        self.conversation_tracker = None
+                        self.next_agent_action = random.choice(dm_nlg.general_fallback).format()
+
+            if self.predicted == 'no':
+                if self.conversation_tracker is not None:
+                    if not self.conversation_tracker.conversation_started():
+                        self.next_agent_action = random.choice(dm_nlg.gbye_client).format()
+                    else:
+                        self.next_agent_action = random.choice(dm_nlg.general_fallback).format()
                     self.conversation_tracker = None
-                    self.next_agent_action = random.choice(dm_nlg.general_fallback).format()
                 else:
-                    self.conversation_tracker = None
                     # Nonsenses yes prediction
                     self.next_agent_action = random.choice(dm_nlg.intent_missing).format(missing=self.user_utterance)
 
@@ -144,23 +141,22 @@ class DMCore:
             self.conversation_tracker = None
             # Nonsenses prediction
             self.next_agent_action = random.choice(dm_nlg.intent_missing).format(missing=self.user_utterance)
-            
 
     def start(self, path=None):
         '''Subscribtion to topic self.conversation_tracker
            Get the current info from that topic
         '''
         # Instiantiate Speech recognition
-        # self.speechrecognition = SPCore(path)
+        self.speechrecognition = SPCore(path)
         # First talk: INTRO
-        # self.speechrecognition.assistant_voice("Hello, I am a Tourist Guide Assistant. How can I help you?")
+        self.speechrecognition.assistant_voice("Hello, I am a Tourist Guide Assistant. How can I help you?")
         logger.info("----------NEW CONEVERSATION STARTED----------")
         logger.info("[AGENT] Hello, I am a Tourist Guide Assistant. How can I help you?")
 
         while (1):
 
-            # client_in = self.speechrecognition.get_audio()
-            client_in = input("[in]: ")
+            client_in = self.speechrecognition.get_audio()
+            #client_in = input("[in]: ")
             logger.info(f"[CLIENT] {client_in}")
             # We start conversation with client_in input
             self.new_utterance(client_in)
@@ -168,18 +164,18 @@ class DMCore:
 
             if self.conversation_tracker is None:
                 # Calling this just to refresh the random messages
-                #self._set_conversation_tracker()
+                # self._set_conversation_tracker()
                 agent_action = self.next_agent_action
                 if self.predicted in ['goodbye', 'no']:
                     logger.info(f"[AGENT] {agent_action}")
-                    # self.speechrecognition.assistant_voice(agent_action)
+                    self.speechrecognition.assistant_voice(agent_action)
                     break
                 logger.info(f"[AGENT] {agent_action}")
-                # self.speechrecognition.assistant_voice(agent_action)    
+                self.speechrecognition.assistant_voice(agent_action)
             else:
                 agent_action = self.conversation_tracker.next_agent_action
                 logger.info(f"[AGENT] {agent_action}")
-                # self.speechrecognition.assistant_voice(agent_action)
+                self.speechrecognition.assistant_voice(agent_action)
 
         logger.info("---------------------------------------------")
 
@@ -198,7 +194,7 @@ class DMCore:
 
         # Keep working with the current conversation tracker
         else:
-            if self.conversation_tracker.conversation_started(): # Conversation still occurring
+            if self.conversation_tracker.conversation_started():  # Conversation still occurring
                 self.conversation_tracker.new_utterance(client_in, self.detected_entities, self.detected_pos_dobj,
                                                         self.predicted)
             else:  # Conversation has been reset
