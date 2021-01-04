@@ -38,8 +38,8 @@ def gmaps_info(text):
         url = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?"
         inputtype = "textquery"
         fields = "formatted_address,name,rating,opening_hours"
-        # TODO REMOVED THIS KEY
-        api_key = 'AIzaSyC6mOYGvwWOtK1YWowXSSEvbeafIGbVo2E'
+        # ADD YOUR KEY HERE
+        api_key = '---------'
 
         # Get info 
         info = requests.get(f"{url}input={text}&inputtype={inputtype}&fields={fields}&key={api_key}").json()
