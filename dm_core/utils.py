@@ -36,7 +36,7 @@ def gmaps_info(text):
         inputtype = "textquery"
         fields= "formatted_address,name,rating,opening_hours"
         # TODO REMOVED THIS KEY
-        api_key = 'AIzaSyC6mOYGvwWOtK1YWowXSSEvbeafIGbVo2E' 
+        api_key = '---------------------' 
 
         # Get info 
         info = requests.get(f"{url}input={text}&inputtype={inputtype}&fields={fields}&key={api_key}").json() 
