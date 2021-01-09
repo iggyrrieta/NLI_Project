@@ -15,7 +15,7 @@ class ConversationTracker:
     }
     REQUEST_HEADER = {
         "Accept" : "application/json",
-        "user-key" : "b91883b642bc6da65f15c8a1d6829288" # TODO: Remove API key before making project public. ;)
+        "user-key" : "--------------------------" 
     }
 
     def __init__(self):
